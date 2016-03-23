@@ -1,0 +1,30 @@
+{
+	"name": "SleepyBot",
+	"version": "1.0.1",
+	"description": "The sleepiest bot ever #SleepyBot",
+	"author": "PrimalMew",
+	"main": "SleepyBot.js",
+	"repository": {
+		"type": "git",
+		"url": ""
+	},
+	"bugs": {
+		"url": ""
+	},
+	"engines": {
+		"node": ">=5.5.0"
+	},
+	"scripts": {
+		"start": "node SleepyBot.js --harmony"
+	},
+	"license": "MIT",
+	"dependencies": {
+		"discord.js": "hydrabolt/discord.js#indev",
+		"request": "*",
+		"xml2js": "*",
+		"cleverbot-node": "*",
+		"osu-api": "*",
+		"chalk": "*",
+		"entities": ">=1.1.1"
+	}
+}
