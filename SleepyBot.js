@@ -1,5 +1,5 @@
-/* A bot created by PrimalMew.
-Run with "node HypeBot.js --harmony". */
+/* A bot created by PrimalMew for SleepyJirachi.
+Run with "node SleepyBot.js --harmony". */
 
 var commands = require("./config/commands.js");
 var mod = require("./config/mod.js");
@@ -21,7 +21,7 @@ bot.on("debug", (m) => { if (config.debug) { console.log(colors.cDebug(" DEBUG "
 bot.on("ready", () => {
 	bot.forceFetchUsers();
 	bot.setPlayingGame(games[Math.floor(Math.random() * (games.length))]); //set game to a random game from games.json
-	console.log(colors.cGreen("HypeBot.EXE is ready!") + " Listening in on " + bot.channels.length + " channels on " + bot.servers.length + " server(s).");
+	console.log(colors.cGreen("SleepyBot is ready!") + " Listening in on " + bot.channels.length + " channels on " + bot.servers.length + " server(s).");
 	versioncheck.checkForUpdate((resp) => {
 		if (resp !== null) { console.log(resp); }
 	});
