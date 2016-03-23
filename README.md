@@ -1,2 +1,2 @@
-# SleepyBot v.1.0.1
+# SleepyBot
 Discord bot made for SleepyJirachi.
