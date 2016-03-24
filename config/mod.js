@@ -11,10 +11,10 @@ PrimalFunctions
 ========*/
 
 function correctUsage(cmd) {
-	return (commands.hasOwnProperty(cmd)) ? "Usage: `" + config.mod_command_prefix + "" + cmd + " " + commands[cmd].usage + "`": "This should display the correct usage but the bot maker made a mistake";
+	return (commands.hasOwnProperty(cmd)) ? "Usage: `" + config.mod_command_prefix + "" + cmd + " " + commands[cmd].usage + "`": "The usage should be displayed, however, PrimalMew has made a mistake. Please let him know.";
 }
 
-function unMute(bot, msg, users, time, role) {
+function unJail(bot, msg, users, time, role) {
 	setTimeout(() => {
 		users.map((user) => {
 			if (msg.channel.server.members.get("name", user.username) && msg.channel.server.roles.get("name", role.name) && bot.memberHasRole(user, role)) {
@@ -231,7 +231,7 @@ var commands = {
 							bot.addMemberToRole(user, role);
 						}
 					});
-					unMute(bot, msg, msg.mentions, time, role);
+					unJail(bot, msg, msg.mentions, time, role);
 					bot.sendMessage(msg, msg.author.username + " It is done.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
 				} else { bot.sendMessage(msg, "Role 'Jailed' not found.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 			} else { bot.sendMessage(msg, correctUsage("jail"), (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
@@ -279,12 +279,12 @@ var commands = {
 		deleteCommand: false, usage: "[message]", cooldown: 1,
 		process: function(bot, msg, suffix) {
 			if (!suffix) { bot.sendMessage(msg, "Specify a message to announce.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
-			if (msg.channel.isPrivate && msg.author.id != config.admin_id) { bot.sendMessage(msg, "Command not available outside of a server.",function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 10000}); }); return; }
-			if (!msg.channel.isPrivate) { if (!msg.channel.permissionsOf(msg.author).hasPermission("manageServer") && msg.author.id != config.admin_id) { bot.sendMessage(msg, "Server admins only", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; } }
+			if (msg.channel.isPrivate && msg.author.id != config.admin_id) { bot.sendMessage(msg, "Command not available outside of a SleepyTown.",function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 10000}); }); return; }
+			if (!msg.channel.isPrivate) { if (!msg.channel.permissionsOf(msg.author).hasPermission("manageServer") && msg.author.id != config.admin_id) { bot.sendMessage(msg, "Mayor's only...", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; } }
 			if (!msg.channel.isPrivate) {
 				if (/^\d+$/.test(suffix)) {
 					var index = confirmCodes.indexOf(parseInt(suffix));
-					if (index == -1) { bot.sendMessage(msg, "Code not found", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+					if (index == -1) { bot.sendMessage(msg, "Code not found.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
 					bot.sendMessage(msg, "Working on it, this might take a bit...");
 					msg.channel.server.members.forEach((usr) => {
 						setTimeout(() => {
@@ -348,7 +348,7 @@ var commands = {
 				if (!msg.channel.permissionsOf(bot.user).hasPermission("manageRoles")) { bot.sendMessage(msg, "SleepyBot doesn't have the permissions to edit roles.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 10000}); }); return; }
 				var role = msg.channel.server.roles.get("name", suffix.replace(/ #?[a-f0-9]{6}/i, ""));
 				if (role) { bot.updateRole(role, {color: parseInt(suffix.replace(/(.*) #?/, ""), 16)}); bot.sendMessage(msg, msg.author.username + " 👍", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
-				} else { bot.sendMessage(msg, "The role \"" + suffix.replace(/ #?[a-f0-9]{6}/i, "") + "\" is not found", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
+				} else { bot.sendMessage(msg, "The role \"" + suffix.replace(/ #?[a-f0-9]{6}/i, "") + "\" is not found.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 			} else { bot.sendMessage(msg, correctUsage("color"),function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 		}
 	},
