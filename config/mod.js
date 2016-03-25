@@ -232,7 +232,7 @@ var commands = {
 						}
 					});
 					unJail(bot, msg, msg.mentions, time, role);
-					bot.sendMessage(msg, "Alright, @"msg.author.username + ", I have jailed this criminal. He'll be released after the time you've specified has passed.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+					bot.sendMessage(msg, "Alright, @" + msg.author.username + ", I've jailed this criminal.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
 				} else { bot.sendMessage(msg, "Role 'Jailed' not found.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 			} else { bot.sendMessage(msg, correctUsage("jail"), (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 		}
