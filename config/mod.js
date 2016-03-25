@@ -278,7 +278,7 @@ var commands = {
 						}
 					});
 					unJail(bot, msg, msg.mentions, time, role);
-					bot.sendMessage(msg, "Dude, @" + msg.author.username + ", your right. That fam had some shitty opinions... :fire:", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+					bot.sendMessage(msg, "Dude, @" + msg.author.username + ", you're right. That fam had some shitty opinions... :fire:", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
 				} else { bot.sendMessage(msg, "The role 'Bad Opinions' is not found.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 			} else { bot.sendMessage(msg, correctUsage("bad"), (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 		}
@@ -296,7 +296,7 @@ var commands = {
 				if (role) {
 					msg.mentions.map((user) => {
 						var toSend = [], count = 0;
-							toSend.push("@" + usr.username + ", it's all good. I hope you don't make any bad opinions in the future...");
+							toSend.push("@" + user.username + ", it's all good. I hope you don't make any bad opinions in the future...");
 						if (bot.memberHasRole(user, role)) {
 							bot.removeMemberFromRole(user, role);
 						}
