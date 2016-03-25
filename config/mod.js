@@ -301,7 +301,7 @@ var commands = {
 							bot.removeMemberFromRole(user, role);
 						}
 					});
-					bot.sendMessage(msg, "It's done, @"msg.author.username + ". His opinions are okay, i guess. For now....", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+					bot.sendMessage(msg, "It's done, @" + msg.author.username + ". His opinions are okay, i guess. For now....", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
 				} else { bot.sendMessage(msg, "The role `Bad Opinions` isn't found dude.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 			} else { bot.sendMessage(msg, correctUsage("unbad"), (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 		}
