@@ -110,7 +110,7 @@ var commands = {
 						delcount = 0;
 						for (var i = 0; i < 100; i++) {
 							if (todo <= 0 || i == 99) {
-								bot.sendMessage(msg, "Successfully cleaned up " + delcount + " Hyped messages", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+								bot.sendMessage(msg, "Successfully cleaned up " + delcount + " messages.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
 								if (config.debug) { console.log(colors.cDebug(" DEBUG ") + "COMPLETE! Deleted " + delcount + " messages."); }
 								return;
 							}
@@ -180,7 +180,7 @@ var commands = {
 	},
 	"kick": {
 		desc: "Kick a user with a message",
-		usage: "[@users] [reason]",
+		usage: "[user] [reason]",
 		deleteCommand: true,
 		cooldown: 3,
 		process: function(bot, msg, suffix) {
@@ -192,13 +192,13 @@ var commands = {
 					msg.channel.server.kickMember(unlucky);
 					if (kickMessage) { bot.sendMessage(unlucky, kickMessage); }
 				});
-				bot.sendMessage(msg, msg.author.username + "It is done.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+				bot.sendMessage(msg, "Okay, @" + msg.author.username + ", They've been kicked from SleepyTown!", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
 			} else { bot.sendMessage(msg, correctUsage("kick"), (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 		}
 	},
 	"ban": {
-		desc: "Ban a user with a message (deletes their messages)",
-		usage: "[@users] [reason]",
+		desc: "Ban a user with the reason.",
+		usage: "[user] [reason]",
 		deleteCommand: true,
 		cooldown: 3,
 		process: function(bot, msg, suffix) {
@@ -210,13 +210,13 @@ var commands = {
 					msg.channel.server.banMember(unlucky, 1);
 					if (banMessage) { bot.sendMessage(unlucky, banMessage); }
 				});
-				bot.sendMessage(msg, msg.author.username + "It is done.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+				bot.sendMessage(msg, "Okay, @" + msg.author.username + ", he is banished from ever enter this town.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
 			} else { bot.sendMessage(msg, correctUsage("ban"), (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 		}
 	},
 	"jail": {
-		desc: "jail users for specified time",
-		usage: "[@users] [time in minutes]",
+		desc: "jail users for specified time.",
+		usage: "[user] [time in minutes]",
 		deleteCommand: true,
 		cooldown: 3,
 		process: function(bot, msg, suffix) {
@@ -232,14 +232,14 @@ var commands = {
 						}
 					});
 					unJail(bot, msg, msg.mentions, time, role);
-					bot.sendMessage(msg, msg.author.username + " It is done.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+					bot.sendMessage(msg, "Alright, @"msg.author.username + ", I have jailed this criminal. He'll be released in " + time + " minutes.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
 				} else { bot.sendMessage(msg, "Role 'Jailed' not found.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 			} else { bot.sendMessage(msg, correctUsage("jail"), (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 		}
 	},
 	"unjail": {
-		desc: "Unjail users",
-		usage: "[@users]",
+		desc: "Unjail the specified user.",
+		usage: "[user]",
 		deleteCommand: true,
 		cooldown: 3,
 		process: function(bot, msg, suffix) {
@@ -253,25 +253,73 @@ var commands = {
 							bot.removeMemberFromRole(user, role);
 						}
 					});
-					bot.sendMessage(msg, msg.author.username + " It is done.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+					bot.sendMessage(msg, "Alrighty, @" + msg.author.username + ", I released them from prison.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
 				} else { bot.sendMessage(msg, "Role `Jailed` not found.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 			} else { bot.sendMessage(msg, correctUsage("unjail"), (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 		}
 	},
+	"bad": {
+		desc: "This m*ther f*cker has some sh*tty opinions dude. BAD SAUCE.",
+		usage: "[user] [time in minutes]",
+		deleteCommand: true,
+		cooldown: 3,
+		process: function(bot, msg, suffix) {
+			if (!msg.channel.permissionsOf(msg.author).hasPermission("manageRoles") && msg.author.id != config.admin_id) { bot.sendMessage(msg, "⚠ You don't have permission to do that. ⚠", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+			} else if (!msg.channel.permissionsOf(bot.user).hasPermission("manageRoles")) { bot.sendMessage(msg, "⚠ SleepyBot can't manage roles. Give it's role the right permissions to do so. ⚠", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+			} else if (suffix && msg.mentions.length > 0 && /^(<@\d+>( ?)*)*( ?)*(\d+(.\d+)?)$/.test(suffix.trim())) {
+				var time = parseFloat(suffix.replace(/<@\d+>/g, "").trim());
+				var role = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "bad opinions" });
+				if (role) {
+					msg.mentions.map((user) => {
+						var toSend = [], count = 0;
+							toSend.push("Okay, @" + user.username + ", your opinions are far out dude.");
+						if (!bot.memberHasRole(user, role)) {
+							bot.addMemberToRole(user, role);
+						}
+					});
+					unJail(bot, msg, msg.mentions, time, role);
+					bot.sendMessage(msg, "Dude, @" + msg.author.username + ", your right. That fam had some shitty opinions... :fire:", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+				} else { bot.sendMessage(msg, "The role 'Bad Opinions' is not found.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
+			} else { bot.sendMessage(msg, correctUsage("bad"), (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
+		}
+	},
+	"unbad": {
+		desc: "Remove users from the bad opinions.",
+		usage: "[user]",
+		deleteCommand: true,
+		cooldown: 3,
+		process: function(bot, msg, suffix) {
+			if (!msg.channel.permissionsOf(msg.author).hasPermission("manageRoles") && msg.author.id != config.admin_id) { bot.sendMessage(msg, "⚠ You don't have permission to do that. ⚠", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+			} else if (!msg.channel.permissionsOf(bot.user).hasPermission("manageRoles")) { bot.sendMessage(msg, "⚠ SleepyBot can't manage roles. Give it's role the right permissions to do so. ⚠", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+			} else if (suffix && msg.mentions.length > 0) {
+				var role = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "bad opinions" });
+				if (role) {
+					msg.mentions.map((user) => {
+						var toSend = [], count = 0;
+							toSend.push("@" + usr.username + ", it's all good. I hope you don't make any bad opinions in the future...");
+						if (bot.memberHasRole(user, role)) {
+							bot.removeMemberFromRole(user, role);
+						}
+					});
+					bot.sendMessage(msg, "It's done, @"msg.author.username + ". His opinions are okay, i guess. For now....", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+				} else { bot.sendMessage(msg, "The role `Bad Opinions` isn't found dude.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
+			} else { bot.sendMessage(msg, correctUsage("unbad"), (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
+		}
+	},
 	"leave": {
-		desc: "Leaves the server.",
+		desc: "SleepyBot will leave the server.",
 		usage: "", deleteCommand: true,
 		process: function(bot, msg, suffix) {
 			if (msg.channel.server) {
 				if (msg.channel.permissionsOf(msg.author).hasPermission("kickMembers") || msg.author.id == config.admin_id) {
-					bot.sendMessage(msg, "Fine. I didn't really like being ordered around anyway. Bye dude.").then(
+					bot.sendMessage(msg, "What?! This must be a mistake! I love SleepyTown!").then(
 					msg.channel.server.leave());
 					console.log(colors.cYellow("Just left server by request of " + msg.sender.username + ". ") + "Currently in only " + bot.servers.length + " servers.");
 				} else {
 					bot.sendMessage(msg, "Uh. How about no... **(You require permission to kick users.)**");
 					console.log(colors.cYellow("Non-privileged user: " + msg.sender.username) + " tried to make me leave the server.");
 				}
-			} else { bot.sendMessage(msg, "⚠ Can't leave a Direct Message. ⚠", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); }
+			} else { bot.sendMessage(msg, "⚠ I, like, can't leave a Direct Message, so... ⚠", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); }
 		}
 	},
 	"announce": {
@@ -319,14 +367,14 @@ var commands = {
 		}
 	},
 	"changelog": {
-		desc: "See recent changes to the bot",
+		desc: "See recent changes to SleepyBot.",
 		deleteCommand: true, usage: "", cooldown: 30,
 		process: function(bot, msg, suffix) {
-			var chanelogChannel = bot.channels.get("id", "98247623709855744");
+			var chanelogChannel = bot.channels.get("id", "");
 			if (!chanelogChannel) { bot.sendMessage(msg, "Changelog can only be shown in SleepyTown.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); });
 			} else {
 				bot.getChannelLogs(chanelogChannel, 2, function(err, messages) {
-					if (err) { bot.sendMessage(msg, "Error getting changelogs: " + err); return; }
+					if (err) { bot.sendMessage(msg, "There is an error getting the changelogs. It seems that the Channel ID isn't defined. Ask PrimalMew. ERROR CODE: " + err); return; }
 					var toSend = ["**|Changelogs|**"];
 					toSend.push("|━━━━━━━━━━━━━━━━━━━━━━━━━|");
 					toSend.push(messages[1]);
@@ -354,7 +402,7 @@ var commands = {
 	},
 	"givecolor": {
 		desc: "Give a user a color",
-		usage: "[@users] [color in hex]",
+		usage: "[user] [color in hex]",
 		deleteCommand: true,
 		cooldown: 2,
 		process: function(bot, msg, suffix) {
@@ -388,7 +436,7 @@ var commands = {
 	},
 	"removecolor": {
 		desc: "Clean unused colors | Remove a user's color | Remove a color",
-		usage: "clean | @users | #hexcolor",
+		usage: "clean | user | #hexcolor",
 		deleteCommand: true,
 		cooldown: 2,
 		process: function(bot, msg, suffix) {

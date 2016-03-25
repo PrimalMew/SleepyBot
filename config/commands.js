@@ -287,7 +287,7 @@ var commands = {
 			if (!msg.channel.isPrivate) {
 				if (suffix) {
 					if (msg.mentions.length > 0) {
-						if (msg.everyoneMentioned) { bot.sendMessage(msg, "Woah, " + msg.author.username + ", calm down please.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+						if (msg.everyoneMentioned) { bot.sendMessage(msg, "Woah, " + msg.author.username + ", calm down please. You can't get details on everyone at the same time, dude!", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
 						if (msg.mentions.length > 4) { bot.sendMessage(msg, "4 user limit.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
 						msg.mentions.map(function(usr) {
 							var toSend = [], count = 0;
