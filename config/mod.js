@@ -150,10 +150,10 @@ var commands = {
 								var delcount = 0;
 								for (var i = 0; i < 100; i++) {
 									if (todo <= 0 || i == 99) {
-										if (!hasImages && !hasTerm && !hasUser) { bot.sendMessage(msg, "Successfully deleted " + delcount + " messages.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
-										} else if (hasImages) { bot.sendMessage(msg, "Successfully deleted " + delcount + " images", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
-										} else if (hasTerm) { bot.sendMessage(msg, "Successfully deleted " + delcount + " messages containing " + term, (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
-										} else if (hasUser) { bot.sendMessage(msg, "Successfully deleted " + delcount + " messages from " + username + ".", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
+										if (!hasImages && !hasTerm && !hasUser) { bot.sendMessage(msg, "Alright, " + msg.sender + ", I've successfully deleted " + delcount + " messages.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+										} else if (hasImages) { bot.sendMessage(msg, "Alright, " + msg.sender + ", I've successfully deleted " + delcount + " images", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+										} else if (hasTerm) { bot.sendMessage(msg, "Alright, " + msg.sender + ", I've successfully deleted " + delcount + " messages containing " + term, (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+										} else if (hasUser) { bot.sendMessage(msg, "Alright, " + msg.sender + ", I've successfully deleted " + delcount + " messages from " + username + ".", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 										if (config.debug) { console.log(colors.cDebug(" DEBUG ") + "COMPLETE! Deleted " + delcount + " messages."); }
 										return;
 									}
@@ -192,7 +192,7 @@ var commands = {
 					msg.channel.server.kickMember(unlucky);
 					if (kickMessage) { bot.sendMessage(unlucky, kickMessage); }
 				});
-				bot.sendMessage(msg, "Okay, @" + msg.author.username + ", They've been kicked from SleepyTown!", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+				bot.sendMessage(msg, "Okay, " + msg.sender + ", They've been kicked from SleepyTown!", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
 			} else { bot.sendMessage(msg, correctUsage("kick"), (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 		}
 	},
@@ -210,7 +210,7 @@ var commands = {
 					msg.channel.server.banMember(unlucky, 1);
 					if (banMessage) { bot.sendMessage(unlucky, banMessage); }
 				});
-				bot.sendMessage(msg, "Okay, @" + msg.author.username + ", he is banished from ever enter this town.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+				bot.sendMessage(msg, "Okay, " + msg.sender + ", he is banished from ever enter this town.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
 			} else { bot.sendMessage(msg, correctUsage("ban"), (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 		}
 	},
@@ -232,7 +232,7 @@ var commands = {
 						}
 					});
 					unJail(bot, msg, msg.mentions, time, role);
-					bot.sendMessage(msg, "Alright, @" + msg.author.username + ", I've jailed this criminal.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+					bot.sendMessage(msg, "Alright, " + msg.sender + ", I've jailed this criminal.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
 				} else { bot.sendMessage(msg, "Role 'Jailed' not found.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 			} else { bot.sendMessage(msg, correctUsage("jail"), (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 		}
@@ -253,7 +253,7 @@ var commands = {
 							bot.removeMemberFromRole(user, role);
 						}
 					});
-					bot.sendMessage(msg, "Alrighty, @" + msg.author.username + ", I released them from prison.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+					bot.sendMessage(msg, "Alrighty, " + msg.sender + ", I released them from prison.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
 				} else { bot.sendMessage(msg, "Role `Jailed` not found.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 			} else { bot.sendMessage(msg, correctUsage("unjail"), (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 		}
@@ -278,7 +278,7 @@ var commands = {
 						}
 					});
 					unJail(bot, msg, msg.mentions, time, role);
-					bot.sendMessage(msg, "Dude, @" + msg.author.username + ", you're right. That fam had some shitty opinions... :fire:", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+					bot.sendMessage(msg, "Dude, " + msg.sender + ", you're right. That fam had some shitty opinions... :fire:", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
 				} else { bot.sendMessage(msg, "The role 'Bad Opinions' is not found.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 			} else { bot.sendMessage(msg, correctUsage("bad"), (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 		}
@@ -301,7 +301,7 @@ var commands = {
 							bot.removeMemberFromRole(user, role);
 						}
 					});
-					bot.sendMessage(msg, "It's done, @" + msg.author.username + ". His opinions are okay, i guess. For now....", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+					bot.sendMessage(msg, "It's done, Lord " + msg.sender + ". His opinions are okay, i guess. For now....", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
 				} else { bot.sendMessage(msg, "The role `Bad Opinions` isn't found dude.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 			} else { bot.sendMessage(msg, correctUsage("unbad"), (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
 		}
@@ -312,11 +312,11 @@ var commands = {
 		process: function(bot, msg, suffix) {
 			if (msg.channel.server) {
 				if (msg.channel.permissionsOf(msg.author).hasPermission("kickMembers") || msg.author.id == config.admin_id) {
-					bot.sendMessage(msg, "What?! This must be a mistake! I love SleepyTown!").then(
+					bot.sendMessage(msg, "What?! But, " + msg.sender + "!? This must be a mistake! I love SleepyTown!").then(
 					msg.channel.server.leave());
 					console.log(colors.cYellow("Just left server by request of " + msg.sender.username + ". ") + "Currently in only " + bot.servers.length + " servers.");
 				} else {
-					bot.sendMessage(msg, "Uh. How about no... **(You require permission to kick users.)**");
+					bot.sendMessage(msg, "Uh, " + msg.sender + ", How about no... **(Dude, you can kick people...)**");
 					console.log(colors.cYellow("Non-privileged user: " + msg.sender.username) + " tried to make me leave the server.");
 				}
 			} else { bot.sendMessage(msg, "⚠ I, like, can't leave a Direct Message, so... ⚠", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); }
@@ -370,15 +370,15 @@ var commands = {
 		desc: "See recent changes to SleepyBot.",
 		deleteCommand: true, usage: "", cooldown: 30,
 		process: function(bot, msg, suffix) {
-			var chanelogChannel = bot.channels.get("id", "");
-			if (!chanelogChannel) { bot.sendMessage(msg, "Changelog can only be shown in SleepyTown.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); });
+			var chanelogChannel = bot.channels.get("id", "162763537452630017");
+			if (!chanelogChannel) { bot.sendMessage(msg, "Changelog can only be shown in SleepyBot's Official Server.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); });
 			} else {
 				bot.getChannelLogs(chanelogChannel, 2, function(err, messages) {
 					if (err) { bot.sendMessage(msg, "There is an error getting the changelogs. It seems that the Channel ID isn't defined. Ask PrimalMew. ERROR CODE: " + err); return; }
 					var toSend = ["**|Changelogs|**"];
-					toSend.push("|━━━━━━━━━━━━━━━━━━━━━━━━━|");
+					toSend.push("|━━━━━━━━━━━━━━━━|");
 					toSend.push(messages[1]);
-					toSend.push("|━━━━━━━━━━━━━━━━━━━━━━━━━|");
+					toSend.push("|━━━━━━━━━━━━━━━━|");
 					toSend.push(messages[0]);
 					bot.sendMessage(msg, toSend);
 				});

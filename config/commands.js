@@ -151,10 +151,10 @@ var commands = {
 		}
 	},
 	"botserver": {
-		desc: "Get a link to the Blacklight Hype Official server.",
+		desc: "Get a link to SleepyBot's Official Server.",
 		cooldown: 10, usage: "",
 		process: function(bot, msg, suffix) {
-			bot.sendMessage(msg, "An invite to the Blacklight Hype server: *http://discord.gg/0pSrDNxApQ6U8pOM*");
+			bot.sendMessage(msg, "An invite to my home: *https://discord.gg/0uMmASW7OYifdsIt*");
 		}
 	},
 	"reverse": {

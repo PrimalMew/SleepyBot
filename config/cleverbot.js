@@ -15,11 +15,11 @@ exports.cleverbot = function(bot, msg) {
 							return String.fromCharCode(parseInt(grp, 16));
 						});
 					}
-					bot.sendMessage(msg, '💬 ' + ent.decodeHTML(resp.message));
+					bot.sendMessage(msg, msg.sender + ', ' + ent.decodeHTML(resp.message));
 					if (!resp.message) { Slave = new Cleverbot(); }
 				});
 			} catch (error) { bot.sendMessage(msg, '⚠ There was an error', function(erro, wMessage) { bot.deleteMessage(wMessage, {'wait': 8000}); }); }
 		});
 		bot.stopTyping(msg.channel);
-	} else { bot.sendMessage(msg, 'Yes?'); }
+	} else { bot.sendMessage(msg, 'Yes, ' + msg.sender + '?'); }
 };
