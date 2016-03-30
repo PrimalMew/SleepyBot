@@ -1,4 +1,4 @@
-# SleepyBot v1.0.5
+# SleepyBot v1.0.6
 Discord bot made for SleepyJirachi.
 
 # |  CHANGELOG  |
