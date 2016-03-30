@@ -1,7 +1,10 @@
 # SleepyBot v1.0.5
 Discord bot made for SleepyJirachi.
 
-# CHANGELOG
+# |  CHANGELOG  |
+
+Version 1.0.6:
+- Added the '*quote [none]/[number]' command.
 
 Version 1.0.5:
 - Fixed Cleverbot so that it know mentions the speaker.
