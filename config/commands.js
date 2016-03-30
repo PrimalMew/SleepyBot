@@ -7,6 +7,7 @@ var xml2js = require("xml2js");
 var osuapi = require("osu-api");
 var ent = require("entities");
 var waifus = require("./waifus.json");
+var quotes = require("./quotes.json").quotes;
 
 var VoteDB = {}
 	,LottoDB = {}
@@ -92,7 +93,7 @@ function generateJSONRating(fullName) {
 }
 
 /*====================
-Commands (Check https://github.com/brussell98/BrussellBot/wiki/New-Command-Guide for how to make new ones)
+Commands
 ====================*/
 
 var aliases = {
@@ -245,6 +246,16 @@ var commands = {
 		deleteCommand: true, cooldown: 10, usage: "",
 		process: function(bot, msg, suffix) {
 			bot.sendMessage(msg, "Hey! I'm " + bot.user.username + "! I was created by PrimalMew in service to Sleepy. Lord of all.");
+		}
+	},
+	"quote": {
+		desc: "Make SleepyBot say one of the listed quotes!",
+		deleteCommand: true,
+		usage: "[none] or specify [number]",
+		cooldown: 3,
+		process: function (bot, msg, suffix) {
+			if (suffix && /^\d+$/.test(suffix) && quotes.length >= parseInt(suffix) - 1) {bot.sendMessage(msg, quotes[suffix - 1]);}
+			else {bot.sendMessage(msg, quotes[Math.floor(Math.random() * (quotes.length))]);}
 		}
 	},
 	"dice": {
