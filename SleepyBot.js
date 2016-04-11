@@ -41,6 +41,8 @@ bot.on("disconnected", () => {
 });
 
 bot.on("message", (msg) => {
+	var roleRes = msg.channel.server.roles.find(r => r.name === 'Residents');
+    var roleHom = msg.channel.server.roles.find(r => r.name === 'Homeless');
 	if (msg.channel.isPrivate && msg.author.id != bot.user.id && (/(^https?:\/\/discord\.gg\/[A-Za-z0-9]+$|^https?:\/\/discordapp\.com\/invite\/[A-Za-z0-9]+$)/.test(msg.content))) { carbonInvite(msg); } //accept invites sent in a DM
 	if (msg.author.id == config.admin_id && msg.content.startsWith("(eval) ")) { evaluateString(msg); return; } //bot owner eval command
 	if (msg.mentions.length !== 0) {
@@ -53,6 +55,23 @@ bot.on("message", (msg) => {
 				var owner = bot.users.get("id", config.admin_id);
 				if (owner.status != "online") { bot.sendMessage(owner, msg.channel.server.name + " > " + msg.author.username + ": " + msg.cleanContent); }
 			}
+		}
+	}
+	if (msg.channel.server) {
+		if (msg.content.startsWith("Resident Me")) {
+			if (!bot.memberHasRole(msg.author, roleRes)) {
+				bot.addMemberToRole(msg.author, roleRes);
+			}
+			bot.sendMessage(msg, "Hey, " + msg.author.username + "! You are now a Resident!", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+			console.log(colors.cServer(msg.channel.server.name) + " > " + colors.cGreen(msg.author.username) + " has asked for Residency. Granted.");
+		}
+	}
+	if (msg.channel.server) {
+		if (msg.content.startsWith("I'm not Homeless")) {
+			if (bot.memberHasRole(msg.author, roleHom)) {
+				bot.removeMemberFromRole(msg.author, roleHom);
+			}
+			bot.sendMessage(msg, "You're definitely not Homeless now!", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
 		}
 	}
 	if (!msg.content.startsWith(config.command_prefix) && !msg.content.startsWith(config.mod_command_prefix)) { return; }
@@ -132,7 +151,9 @@ function execCommand(msg, cmd, suffix, type) {
 
 //event listeners
 bot.on("serverNewMember", (objServer, objUser) => {
-	if (config.greet_new_memebrs) { console.log("New member on " + objServer.name + ": " + objUser.username); bot.sendMessage(objServer.defaultChannel, "Welcome to " + objServer.name.replace(/@/g, '') + " " + objUser.username.replace(/@/g, '')); }
+	if (config.greet_new_members) { console.log("New member on " + objServer.name + ": " + objUser.username); bot.sendMessage(objServer.defaultChannel, "Welcome to " + objServer.name.replace(/@/g, '') + ", " + objUser.username.replace(/@/g, '')); }
+	var role = objServer.roles.find(r => r.name === 'Homeless');
+		bot.addMemberToRole(objUser, role);
 });
 
 bot.on("channelCreated", (objChannel) => {
@@ -224,8 +245,8 @@ function carbonInvite(msg) {
 					var toSend = [];
 					if (msg.author.id == '109338686889476096') { toSend.push("Greetings! I'm **HypeBot**! I was invited to this server through carbonitex.net."); }
 					else { toSend.push("Greetings! I'm **" + bot.user.username + "** and I was invited to this server by " + msg.author.username + "."); }
-					toSend.push("Could you use ***-*help*** to see what commands are available? Mods can use ***-**help*** for moderator commands.");
-					toSend.push("If you don't want me here, you can use `-*leave` to make me leave the server.");
+					toSend.push("Could you use **help* to see what commands are available? Mods can use -help for moderator commands.");
+					toSend.push("If you don't want me here, you can use `-leave` to make me leave the server.");
 					bot.sendMessage(server.defaultChannel, toSend);
 				}
 			});

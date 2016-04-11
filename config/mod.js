@@ -219,7 +219,7 @@ var commands = {
 		usage: "[user] [time in minutes]",
 		deleteCommand: true,
 		cooldown: 3,
-		process: function(bot, msg, suffix) {
+		process: function(bot, msg, suffix, reason) {
 			if (!msg.channel.permissionsOf(msg.author).hasPermission("manageRoles") && msg.author.id != config.admin_id) { bot.sendMessage(msg, "⚠ You don't have permission to do that. ⚠", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
 			} else if (!msg.channel.permissionsOf(bot.user).hasPermission("manageRoles")) { bot.sendMessage(msg, "⚠ SleepyBot can't manage roles. Give it's role the right permissions to do so. ⚠", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
 			} else if (suffix && msg.mentions.length > 0 && /^(<@\d+>( ?)*)*( ?)*(\d+(.\d+)?)$/.test(suffix.trim())) {
