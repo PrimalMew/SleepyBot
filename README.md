@@ -1,5 +1,7 @@
 # SleepyBot v1.0.7
-Discord bot made for SleepyJirachi.
+##### Discord bot made for SleepyJirachi in service to SleepyTown. Join the Town here: https://discord.gg/0X7Rd55XaUoVIIay
+
+###### For SleepyBot's Official Server, please use this invite: https://discord.gg/0uMmASW7OYifdsIt
 
 # |  CHANGELOG  |
 
