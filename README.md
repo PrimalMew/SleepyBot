@@ -4,7 +4,7 @@
 ###### For SleepyBot's Official Server, please use this invite: https://discord.gg/0uMmASW7OYifdsIt
 
 # |  CHANGELOG  |
-
+### [Current]
 #### **Version 1.0.7**:
 - Upon joining, all users will be given the 'Homeless' role.
 - If a user says 'Resident Me' they will be given Residency.
