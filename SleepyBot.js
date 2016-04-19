@@ -33,7 +33,7 @@ bot.on("disconnected", () => {
 	} else { //if on heroku try to re-connect
 		setTimeout(() => {
 			console.log("Attempting to log in...");
-			bot.login(process.env.email, process.env.password, function(err, token) {
+			bot.loginWithToken(config.bot_token, process.env.email, process.env.password, function(err, token) {
 				if (err) { console.log(err); process.exit(0); }
 				if (!token) { console.log(colors.cWarn(" WARN ") + "Failed to re-connect"); process.exit(0); }
 			});}, 20000); //waits 20 seconds before doing
@@ -202,12 +202,12 @@ bot.on("serverDeleted", (objServer) => { //detect when the bot leaves a server
 //login
 console.log("Logging in...");
 if (config.use_env) {
-	bot.login(process.env.email, process.env.password, function(err, token) {
+	bot.loginWithToken(config.bot_token, process.env.email, process.env.password, function(err, token) {
 		if (err) { console.log(err); setTimeout(() => { process.exit(0); }, 2000); }
 		if (!token) { console.log(colors.cWarn(" WARN ") + "failed to connect"); setTimeout(() => { process.exit(0); }, 2000); } //make sure it logged in successfully
 	});
 } else {
-	bot.login(config.email, config.password, function(err, token) {
+	bot.loginWithToken(config.bot_token, config.email, config.password, function(err, token) {
 		if (err) { console.log(err); setTimeout(() => { process.exit(1); }, 2000); }
 		if (!token) { console.log(colors.cWarn(" WARN ") + "failed to connect"); setTimeout(() => { process.exit(1); }, 2000); }
 	});
