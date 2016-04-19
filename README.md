@@ -1,11 +1,15 @@
-# SleepyBot v1.0.7
+# SleepyBot v1.0.8
 ##### Discord bot made for _SleepyJirachi_ in service to _SleepyTown_. Join the Town here: https://discord.gg/0X7Rd55XaUoVIIay
 
 ###### For SleepyBot's Official Server, please use this invite: https://discord.gg/0uMmASW7OYifdsIt
 
 # |    _CHANGELOG_    |
 
-#### **Version 1.0.7**:
+#### **Version 1.0.8**:
+- Successfully acheived BOT tag! [OAuth2]
+- (SleepyBot still physically run.)
+
+###### *Version 1.0.7*:
 - Upon joining, all users will be given the 'Homeless' role.
 - If a user says 'Resident Me' they will be given Residency.
 - If a user says 'I'm not Homeless' they will have their Homelessness removed.
