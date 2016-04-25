@@ -1,11 +1,15 @@
-# SleepyBot v1.0.8
+# SleepyBot v1.0.9
 ##### Discord bot made for _SleepyJirachi_ in service to _SleepyTown_. Join the Town here: https://discord.gg/0X7Rd55XaUoVIIay
 
 ###### For SleepyBot's Official Server, please use this invite: https://discord.gg/0uMmASW7OYifdsIt
 
 # |    _CHANGELOG_    |
 
-#### **Version 1.0.8**:
+#### **Version 1.0.9**:
+- Auto-Residency has been improved. Speak for the first time and become a Resident.
+- Improved certain function and their performance.
+
+###### *Version 1.0.8*:
 - Successfully acheived BOT tag! [OAuth2]
 - (SleepyBot still physically run.)
 
