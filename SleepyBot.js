@@ -41,8 +41,6 @@ bot.on("disconnected", () => {
 });
 
 bot.on("message", (msg) => {
-	var roleRes = msg.channel.server.roles.find(r => r.name === 'Residents');
-    var roleHom = msg.channel.server.roles.find(r => r.name === 'Homeless');
 	if (msg.channel.isPrivate && msg.author.id != bot.user.id && (/(^https?:\/\/discord\.gg\/[A-Za-z0-9]+$|^https?:\/\/discordapp\.com\/invite\/[A-Za-z0-9]+$)/.test(msg.content))) { carbonInvite(msg); } //accept invites sent in a DM
 	if (msg.author.id == config.admin_id && msg.content.startsWith("(eval) ")) { evaluateString(msg); return; } //bot owner eval command
 	if (msg.mentions.length !== 0) {
@@ -57,23 +55,43 @@ bot.on("message", (msg) => {
 			}
 		}
 	}
-	if (msg.channel.server) {
-		if (msg.content.startsWith("Resident Me")) {
+	if (msg.content) {
+		if (!msg.channel.isPrivate) {
+			var roleBot = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "bot" });
+			if (bot.memberHasRole(msg.author, roleBot)) { return; }
+			var roleRes = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "residents" });
+			if (!bot.memberHasRole(msg.author, roleRes)) {
+				bot.addMemberToRole(msg.author, roleRes);
+				bot.sendMessage(msg, "Hey, " + msg.sender + "! Welcome to " + msg.channel.server.name + "! You have been made a Resident since this is your first time speaking here.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+				console.log(colors.cServer(msg.channel.server.name) + " > " + colors.cGreen(msg.author.username) + " has spoken for the first time! They have been granted Residency.");
+			}
+			var roleHom = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "homeless" });
+			if (bot.memberHasRole(msg.author, roleHom)) {
+				bot.removeMemberFromRole(msg.author, roleHom);
+			}
+		}
+	}
+	/*if (msg.content.startsWith("Resident Me")) {
+		if (!msg.channel.isPrivate) {
+			var roleRes = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "residents" });
+			var roleHom = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "homeless" });
 			if (!bot.memberHasRole(msg.author, roleRes)) {
 				bot.addMemberToRole(msg.author, roleRes);
 			}
 			bot.sendMessage(msg, "Hey, " + msg.author.username + "! You are now a Resident!", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+			bot.removeMemberFromRole(msg.author, roleHom);
 			console.log(colors.cServer(msg.channel.server.name) + " > " + colors.cGreen(msg.author.username) + " has asked for Residency. Granted.");
-		}
-	}
-	if (msg.channel.server) {
-		if (msg.content.startsWith("I'm not Homeless")) {
+		} else { bot.sendMessage(msg, "I can't Resident you in Direct Messages!"), function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }; }
+	}*/
+	/*if (msg.content.startsWith("I'm not Homeless")) {
+		if (!msg.channel.isPrivate) {
+			var roleHom = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "homeless" });
 			if (bot.memberHasRole(msg.author, roleHom)) {
 				bot.removeMemberFromRole(msg.author, roleHom);
 			}
 			bot.sendMessage(msg, "You're definitely not Homeless now!", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
-		}
-	}
+		} else { bot.sendMessage(msg, "You're not Homeless in DMs!"), function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }; }
+	}*/
 	if (!msg.content.startsWith(config.command_prefix) && !msg.content.startsWith(config.mod_command_prefix)) { return; }
 	if (msg.author.id == bot.user.id) { return; }
 	var cmd = msg.content.split(" ")[0].replace(/\n/g, " ").substring(1).toLowerCase();
