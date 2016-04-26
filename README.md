@@ -6,11 +6,11 @@
 # |    _CHANGELOG_    |
 
 #### **Version 1.1.0**:
-- Added the '*twitchinfo [Twitch Username]' command. Find out if the user is currently streaming or not.
-- Added the '*reminder' command. Use '*help reminder' to learn more.
+- Added the 'twitchinfo [Twitch Username]' command. Find out if the user is currently streaming or not.
+- Added the 'reminder' command. Use 'help reminder' to learn more.
 - Minor performance tuning.
 - Renamed a lot of things so that they make more sense.
-- The '*botserver' command has been renamed to '*server'.
+- The 'botserver' command has been renamed to 'server'.
 - Rejoice! '-help' no longer crashes SleepyBot!
 
 ###### *Version 1.0.9*:
