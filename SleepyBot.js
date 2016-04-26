@@ -2,13 +2,13 @@
 Run with "node SleepyBot.js --harmony". */
 
 var commands = require("./config/commands.js");
-var mod = require("./config/mod.js");
+var mod = require("./config/modcmds.js");
 var config = require("./config/config.json");
 var games = require("./config/games.json").games;
-var versioncheck = require("./config/versioncheck.js");
+var version = require("./config/version.js");
 var discord = require("discord.js");
 var cleverbot = require("./config/cleverbot.js").cleverbot;
-var colors = require("./config/styles.js");
+var colors = require("./config/colors.js");
 checkConfig();
 
 var lastExecTime = {};
@@ -22,7 +22,7 @@ bot.on("ready", () => {
 	bot.forceFetchUsers();
 	bot.setPlayingGame(games[Math.floor(Math.random() * (games.length))]); //set game to a random game from games.json
 	console.log(colors.cGreen("SleepyBot is ready!") + " Listening in on " + bot.channels.length + " channels on " + bot.servers.length + " server(s).");
-	versioncheck.checkForUpdate((resp) => {
+	version.checkForUpdate((resp) => {
 		if (resp !== null) { console.log(resp); }
 	});
 });
@@ -284,8 +284,8 @@ function reload() {
 	try {mod = require("./config/mod.js");
 	} catch (err) { console.log(colors.cError(" ERROR ") + "Problem loading mod.js: " + err); }
 	delete require.cache[require.resolve("./config/config.json")];
-	delete require.cache[require.resolve("./config/versioncheck.js")];
-	versioncheck = require("./config/versioncheck.js");
+	delete require.cache[require.resolve("./config/version.js")];
+	version = require("./config/version.js");
 	delete require.cache[require.resolve("./config/styles.js")];
 	colors = require("./config/styles.js");
 	delete require.cache[require.resolve("./config/cleverbot.js")];

@@ -1,7 +1,7 @@
 var config = require("./config.json");
 var games = require("./games.json").games;
 var version = require("../package.json").version;
-var colors = require("./styles.js");
+var colors = require("./colors.js");
 var request = require("request");
 var xml2js = require("xml2js");
 var osuapi = require("osu-api");
@@ -126,9 +126,9 @@ var commands = {
 		process: function(bot, msg, suffix) {
 			var toSend = [];
 			if (!suffix) {
-				toSend.push("Use *help [command] to get info on a specific command.");
-				toSend.push("Mod commands can be found with -**help [command].");
-				toSend.push("**|Commands|**\n");
+				toSend.push("Use '*help [command]' to get info on a specific command.");
+				toSend.push("Mod commands can be found with '-help [command]'.");
+				toSend.push("**| Commands |**\n");
 				toSend.push("`@" + bot.user.username + " text`\n		Talk to SleepyBot!");
 				Object.keys(commands).forEach(function(cmd) {
 					if (commands[cmd].hasOwnProperty("shouldDisplay")) {
@@ -151,7 +151,7 @@ var commands = {
 			}
 		}
 	},
-	"botserver": {
+	"server": {
 		desc: "Get a link to SleepyBot's Official Server.",
 		cooldown: 10, usage: "",
 		process: function(bot, msg, suffix) {
@@ -903,6 +903,34 @@ var commands = {
 			}
 		}
 	},
+	"twitchinfo": {
+		usage: "[Twitch Username]",
+		desc: "Information on the specified Twitch User.",
+		process: function(bot, msg, suffix) {
+			if (!suffix) {
+				bot.sendMessage(msg.channel, "*Please specify a Twitch Username.*");
+				return;
+			} else {
+				console.log("Retreiving Twitch Stats of " + suffix + "...");
+				request("https://api.twitch.tv/kraken/streams/" + suffix, function(err, res, body) {
+					if (res.statusCode == 404 || err) {
+						console.log(colors.cRed("Couldn't retrieve Twitch Stats of " + suffix + "."));
+						bot.sendMessage(msg.channel, "__Couldn't find information on that user.__");
+						return;
+					}
+					if (!err && res.statusCode == 200) {
+						console.log(colors.cGreen("Success! ") + suffix + "'s Twitch status has been found. Displaying.");
+						var stream = JSON.parse(body);
+						if (stream.stream) {
+							bot.sendMessage(msg.channel, "Well, " + msg.sender + ", " + suffix + " is online, they are playing " + stream.stream.game + "\n" + stream.stream.channel.status + "\n" + stream.stream.channel.url);
+						} else {
+							bot.sendMessage(msg.channel, suffix + " is currently offline, and not streaming.");
+						}
+					}
+				});
+			}
+		}
+	},
 	"image": {
 		desc: "Get an image from Imgur",
 		usage: "<subreddit> [--nsfw] [--day | --week | --month | --year | --all]",
@@ -931,6 +959,70 @@ var commands = {
 					}
 				});
 			} else bot.sendMessage(msg, correctUsage("image"), (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+		}
+	},
+	"reminder": {
+		desc: "Set a reminder for SleepyBot to remind you of. - `Proper use:` __**Remove:**__ Remove a reminder containing the text input.\n__**List:**__ Gives a list of your reminders.\n__***Add:**__ Add a reminder with this format - *[text] in [0 days] [00 hours] [00 minutes] [000 seconds]* ",
+		usage: "__remove [text in reminder]__ | __list__ | __[text] in <[0 days] [00 hours] [00 minutes] [000 seconds]>__",
+		deleteCommand: false, cooldown: 5,
+		process: function(bot, msg, suffix) {
+			if (/^remove/i.test(suffix)) {
+
+				if (suffix.length > 7) {
+					remind.removeReminder(suffix.replace(/^remove /i, ''), msg.author.id, ()=>{
+						bot.sendMessage(msg, "Reminder removed, " + msg.sender + ".");
+					}, ()=>{
+						bot.sendMessage(msg, "The reminder you specified doesn't exist or hasn't been set yet, dude.");
+					});
+				} else {
+					var list = remind.listForUser(msg.author.id);
+					if (list && list.length > 0) bot.sendMessage(msg, "__Please use `" + config.command_prefix + "reminder [remove] [text]` to remove any reminder.__\n`Reminders:\n```" + list.join('\n') + "```");
+					else bot.sendMessage(msg, "You haven't set any reminders, " + msg.sender + ".");
+				}
+
+			} else if (suffix.toLowerCase() === 'list') {
+
+				var list = remind.listForUser(msg.author.id);
+				if (list && list.length > 0) bot.sendMessage(msg, "`Reminders:`\n```" + list.join('\n') + "```");
+				else bot.sendMessage(msg, "You haven't set any reminders, " + msg.sender + ".");
+
+			} else if (/^.* in( ((\d|a|one|two|three) ?d[ays]*)( and| &)?)?( ((\d\d?\d?|a|an|one|two|three) ?h[ours]*)( and| &)?)?( ((\d\d?\d?|a|one|two|three) ?m[inutes]*)( and| &)?)?( (\d\d?\d?|a|one|two|three) ?s[econds]*)?$/i.test(suffix)) {
+
+				if (remind.countForUser(msg.author.id) >= 5) {
+					bot.sendMessage(msg, "No more reminders can be added. You have reached the max limit of `5`. Please, remove a reminder with `" + config.command_prefix + "reminder [remove] [text]` to make more available spots.");
+					return;
+				}
+
+				var millisecs = 0
+					,timeString = suffix.replace(/.* in /i, '');
+				if (/ ((\d\d?\d?\d?\d?|a|one|two|three) ?s[econds]*)$/i.test(suffix)) {
+					millisecs += timeParser(/((\d\d?\d?\d?\d?|a|one|two|three) ?s[econds]*)$/i.exec(suffix)[2] + "", 1000);
+					suffix = suffix.replace(/( and| &)? ((\d\d?\d?\d?\d?|a|one|two|three) ?s[econds]*)$/i, '');
+				}
+				if (/ ((\d\d?\d?|a|one|two|three) ?m[inutes]*)$/i.test(suffix)) {
+					millisecs += timeParser(/((\d\d?\d?|a|one|two|three) ?m[inutes]*)$/i.exec(suffix)[2] + "", 60000);
+					suffix = suffix.replace(/( and| &)? ((\d\d?\d?|a|one|two|three) ?m[inutes]*)$/i, '');
+				}
+				if (/ ((\d\d?\d?|a|an|one|two|three) ?h[ours]*)$/i.test(suffix)) {
+					millisecs += timeParser(/((\d\d?\d?|a|an|one|two|three) ?h[ours]*)$/i.exec(suffix)[2] + "", 3600000);
+					suffix = suffix.replace(/( and| &)? ((\d\d?\d?|a|an|one|two|three) ?h[ours]*)$/i, '');
+				}
+				if (/ ((\d|a|one|two|three) ?d[ays]*)$/i.test(suffix)) {
+					var hours = /((\d|a|one|two|three) ?d[ays]*)$/i.exec(suffix)[2];
+					if (/\d/.test(hours)) {
+						if (hours > 7) { bot.sendMessage(msg, "__Reminders expire after 7 days.__ `Don't set your reminder for longer than that.`", (e, m)=>{bot.deleteMessage(m,{"wait": 10000});}); return; }
+					}
+					millisecs += timeParser(hours + "", 86400000);
+					suffix = suffix.replace(/( and| &)? ((\d|a|one|two|three) ?d[ays]*)$/i, '');
+				}
+				if (millisecs > 604800000) { bot.sendMessage(msg, "__Reminders expire after 7 days.__ `Don't set your reminder for longer than that.`", (e, m)=>{bot.deleteMessage(m,{"wait": 10000});}); return; }
+				else if (millisecs <= 0) { bot.sendMessage(msg, "Please specify a time for me to remind you.", (e, m)=>{bot.deleteMessage(m,{"wait": 10000});}); return; }
+
+				var reminder = suffix.replace(/^(me )?(to )?/i, '').replace(/in ?$/i, '').trim();
+				remind.addReminder(msg.author.id, Date.now() + millisecs, reminder);
+				bot.sendMessage(msg, "Alright, "+ msg.sender + ", I'll reminder you in" + timeString);
+
+			} else correctUsage("reminder", this.usage, msg, bot, 15000);
 		}
 	}
 };
