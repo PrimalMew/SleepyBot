@@ -1,11 +1,16 @@
-# SleepyBot v1.1.0
+# SleepyBot v1.1.1
 ##### Discord bot made for _SleepyJirachi_ in service to _SleepyTown_. Join the Town here: https://discord.gg/0X7Rd55XaUoVIIay
 
 ###### For SleepyBot's Official Server, please use this invite: https://discord.gg/0uMmASW7OYifdsIt
 
 # |    _CHANGELOG_    |
 
-#### **Version 1.1.0**:
+#### **Version 1.1.1**:
+- Minor, unnoticeable changes and improvements.
+- Improved the welcoming of new Residents.
+- Database beginnings.
+
+###### *Version 1.1.0*:
 - Added the 'twitchinfo [Twitch Username]' command. Find out if the user is currently streaming or not.
 - Added the 'reminder' command. Use 'help reminder' to learn more.
 - Minor performance tuning.
