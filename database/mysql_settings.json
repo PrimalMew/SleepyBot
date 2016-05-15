@@ -1,0 +1,8 @@
+{
+    "db_type": "mysql",
+	"db_host": "localhost",
+	"db_port": "3306",
+	"db_username": "SleepyBot",
+	"db_password": "bestBOT2016",
+	"db_dbname": "my_db"
+}

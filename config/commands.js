@@ -8,6 +8,12 @@ var osuapi = require("osu-api");
 var ent = require("entities");
 var waifus = require("./waifus.json");
 var quotes = require("./quotes.json").quotes;
+var request = require("request");
+var remind = require('./remind.js');
+var db = require("./db.js");
+var mysql = require("mysql");
+var mysql_db = require("./mysql.js");
+var async = require("async");
 
 var VoteDB = {}
 	,LottoDB = {}
@@ -162,7 +168,11 @@ var commands = {
 		desc: "Return's the text backwards.",
 		usage: "[text]", deleteCommand: true, cooldown: 5, shouldDisplay: false,
 		process: function(bot, msg, suffix) {
-			if (suffix) { bot.sendMessage(msg, "\u202e " + suffix); }
+			var allowChannel = bot.channels.get("id", "95687096504680448");
+			if (!allowChannel) { bot.sendMessage(msg, "`You can only reverse words in` __**#post-office**__", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); });
+			} else {
+				if (suffix) { bot.sendMessage(msg, "\u202e " + suffix); }
+			}
 		}
 	},
 	"id": {
@@ -962,8 +972,8 @@ var commands = {
 		}
 	},
 	"reminder": {
-		desc: "Set a reminder for SleepyBot to remind you of. - `Proper use:` __**Remove:**__ Remove a reminder containing the text input.\n__**List:**__ Gives a list of your reminders.\n__***Add:**__ Add a reminder with this format - *[text] in [0 days] [00 hours] [00 minutes] [000 seconds]* ",
-		usage: "__remove [text in reminder]__ | __list__ | __[text] in <[0 days] [00 hours] [00 minutes] [000 seconds]>__",
+		desc: "Set a reminder for SleepyBot to remind you of. - `Proper use:` __**Remove:**__ Remove a reminder containing the text input.\n__**List:**__ Gives a list of your reminders.\n__**Add:**__ Add a reminder with this format - *[text] in [0 days] [00 hours] [00 minutes] [000 seconds]* ",
+		usage: "remove [text in reminder] | list | [text] in <[0 days] [00 hours] [00 minutes] [000 seconds]>",
 		deleteCommand: false, cooldown: 5,
 		process: function(bot, msg, suffix) {
 			if (/^remove/i.test(suffix)) {

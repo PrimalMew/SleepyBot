@@ -9,6 +9,13 @@ var version = require("./config/version.js");
 var discord = require("discord.js");
 var cleverbot = require("./config/cleverbot.js").cleverbot;
 var colors = require("./config/colors.js");
+var db = require("./config/db.js");
+var remind = require("./config/remind.js");
+var mysql = require("mysql");
+var rss_config = require("./config/rss_settings.json");
+var mysql_db = require("./config/mysql.js")
+var async = require("async")
+var request = require('request')
 checkConfig();
 
 var lastExecTime = {};
@@ -62,7 +69,7 @@ bot.on("message", (msg) => {
 			var roleRes = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "residents" });
 			if (!bot.memberHasRole(msg.author, roleRes)) {
 				bot.addMemberToRole(msg.author, roleRes);
-				bot.sendMessage(msg, "Hey, " + msg.sender + "! Welcome to " + msg.channel.server.name + "! You have been made a Resident since this is your first time speaking here.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });
+				/*bot.sendMessage(msg, "Hey, " + msg.sender + "! Welcome to " + msg.channel.server.name + "! You have been made a Resident since this is your first time speaking here.", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); });*/
 				console.log(colors.cServer(msg.channel.server.name) + " > " + colors.cGreen(msg.author.username) + " has spoken for the first time! They have been granted Residency.");
 			}
 			var roleHom = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "homeless" });
