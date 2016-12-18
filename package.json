@@ -1,6 +1,6 @@
 {
 	"name": "SleepyBot",
-	"version": "1.1.1",
+	"version": "1.1.4",
 	"description": "The Sleepiest Bot Ever! #SleepyBot",
 	"author": "PrimalMew",
 	"main": "SleepyBot.js",
@@ -25,6 +25,17 @@
 		"cleverbot-node": "*",
 		"osu-api": "*",
 		"chalk": "*",
-		"entities": ">=1.1.1"
+		"entities": ">=1.1.1",
+		"async": "*",
+		"fs": "*",
+		"indico.io": "*",
+		"mysql": "*",
+		"node-json-db": "*",
+		"node-mysql": "*",
+		"node-schedule": "*",
+		"pokeapi": "*",
+		"util": "*",
+		"xmlhttprequest": "*",
+		"xml2js": "*"
 	}
 }
