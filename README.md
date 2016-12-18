@@ -5,7 +5,32 @@
 
 # |    _CHANGELOG_    |
 
-#### **Version 1.1.1**:
+#### **Version 1.1.4**:
+- A lot of stuff, forgot lmao
+- Look at v.1.1.2-v.1.1.3
+
+###### *Version 1.1.3*:
+- ADDED a database finally. Now cool stuff can happen!
+- General overall improvements to the bot.
+- Lots of other cool features.
+- Other minor performance improvements and tweaks.
+- LAST OLD VERSION; UPDATE NEEDED
+
+###### *Version 1.1.2*:
+- FINALLY fixed the Residents problem. Improved the code as well.
+- Attempted Banned Words function. (Doesn't work.)[Not sure if will continue development.]
+- Added functionality for checking when Sleepy is streaming. SleepyBot will announce this. [Doesn't officially work yet. In development.]
+- Added the '-addrole [user] [role]' command for admins. It does what it says.
+- Added checking for if Sleepy is streaming or not. SleepyBot announces this.
+- Added the '*pgostatus' command to check Pokemon GO's server status.
+- Added the '*pgo' command. It is used to chose a team and gives you the role "Explorer."
+- Added the '*suggest [message]' command for users to suggest general feature for sleepybot.
+- Added the '*pgosuggest [message]' command so that users can suggest features for sleepybot Pokemon GO department.
+- IN PROGRESS: The '*jailvote [user]' command is a work in progress. Will be finished in v1.1.4 most likely.
+- NEW IMAGE: SleepyBot got a new image in this version. Yay!
+- Other minor performance improvements and tweaks.
+
+###### *Version 1.1.1*:
 - Minor, unnoticeable changes and improvements.
 - Improved the welcoming of new Residents.
 - Database beginnings.
