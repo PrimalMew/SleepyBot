@@ -9,11 +9,22 @@ var ent = require("entities");
 var waifus = require("./waifus.json");
 var quotes = require("./quotes.json").quotes;
 var request = require("request");
-var remind = require('./remind.js');
-var db = require("./db.js");
 var mysql = require("mysql");
-var mysql_db = require("./mysql.js");
 var async = require("async");
+var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+var pokeapi = require("pokeapi");
+var JsonDB = require("node-json-db");
+
+var db = new JsonDB("./database/Sleepybase", true, true);
+
+//POKEDEX VARIABLE temporarily out of service until i figure out how to make it work
+
+/*var pokedex = require("./pokedex.json");*/
+
+var pAPI = pokeapi.v1();
+
+var jailVotes = 0;
+var jailIP = 0;
 
 var VoteDB = {}
 	,LottoDB = {}
@@ -98,6 +109,46 @@ function generateJSONRating(fullName) {
 	return score;
 }
 
+/*function jailTrial(bot, msg) {
+	setTimeout(() => {
+		bot.channels.get("id", 98250343757938688).sendMessage("`25` minutes left until the *accused*, **" + usr.username +"**, gets their sentence.");
+	}, 300000);
+	setTimeout(() => {
+		bot.channels.get("id", 98250343757938688).sendMessage("`20` minutes left until the *accused*, **" + usr.username +"**, gets their sentence.");
+	}, 600000);
+	setTimeout(() => {
+		bot.channels.get("id", 98250343757938688).sendMessage("`15` minutes left until the *accused*, **" + usr.username +"**, gets their sentence.");
+	}, 900000);
+	setTimeout(() => {
+		bot.channels.get("id", 98250343757938688).sendMessage("`10` minutes left until the *accused*, **" + usr.username +"**, gets their sentence.");
+	}, 1200000);
+	setTimeout(() => {
+		bot.channels.get("id", 98250343757938688).sendMessage("`5` minutes left until the *accused*, **" + usr.username +"**, gets their sentence.");
+	}, 1500000);
+	setTimeout(() => {
+		bot.channels.get("id", 98250343757938688).sendMessage("`2` minutes and `30` seconds left until the *accused*, **" + usr.username +"**, gets their sentence.");
+	}, 1650000);
+	setTimeout(() => {
+		if (jailVotes <= 9) {
+			bot.channels.get("id", 98250343757938688).sendMessage("__The results are in.__\n**" + usr.username + "** is `NOT GUILTY`.\nThey will not be sent to jail.");
+			bot.sendFile(msg, body, "./images/objection.png");
+			jailVotes = 0;
+		} else if (jailVotes >= 10) {
+			var role = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "jailed" });
+			if (!bot.memberHasRole(usr, role)) {
+				bot.addMemberToRole(usr, role);
+			}
+			setTimeout(() => {
+				bot.channels.get("id", 98250343757938688).sendMessage("__The results are in.__\n**" + usr.username + "** is `GUILTY`.\nThey have been placed in jail. Lord <@95618471806636032> shall decide their fate.");
+				bot.sendFile(msg, body, "./images/objection_lost.png");
+			}, 500);
+			setTimeout(() => {
+				jailVotes = 0;
+			}, 1000);
+		} else { return }
+	}, 1800000);
+}*/
+
 /*====================
 Commands
 ====================*/
@@ -144,16 +195,16 @@ var commands = {
 				var helpMessage = toSend.join("\n");
 				var helpPart2 = helpMessage.substring(helpMessage.indexOf("`]lotto`"));
 				var helpPart1 = helpMessage.substring(0, helpMessage.indexOf("`]lotto`") - 1);
-				bot.sendMessage(msg.author, helpPart1);
-				bot.sendMessage(msg.author, helpPart2);
+				bot.sendMessage(msg.author, "<:Bot:230821190648856577> " + helpPart1);
+				bot.sendMessage(msg.author, "<:Bot:230821190648856577>" + helpPart2);
 			} else {
 				if (commands.hasOwnProperty(suffix)) {
 					toSend.push("**" + config.command_prefix + "" + suffix + ":** " + commands[suffix].desc);
 					if (commands[suffix].hasOwnProperty("usage")) { toSend.push("**Usage:** `" + config.command_prefix + "" + suffix + " " + commands[suffix].usage + "`"); }
 					if (commands[suffix].hasOwnProperty("cooldown")) { toSend.push("**Cooldown:** " + commands[suffix].cooldown + " seconds"); }
 					if (commands[suffix].hasOwnProperty("deleteCommand")) { toSend.push("*Delete Command: true*"); }
-					bot.sendMessage(msg, toSend);
-				} else { bot.sendMessage(msg, "Command `" + suffix + "` not found.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); }
+					bot.sendMessage(msg, "<:Bot:230821190648856577> " + toSend);
+				} else { bot.sendMessage(msg, "<:Bot:230821190648856577> Command `" + suffix + "` not found.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); }
 			}
 		}
 	},
@@ -161,7 +212,7 @@ var commands = {
 		desc: "Get a link to SleepyBot's Official Server.",
 		cooldown: 10, usage: "",
 		process: function(bot, msg, suffix) {
-			bot.sendMessage(msg, "An invite to my home: *https://discord.gg/0uMmASW7OYifdsIt*");
+			bot.sendMessage(msg, "<:Bot:230821190648856577> An invite to my home: *https://discord.gg/0uMmASW7OYifdsIt*");
 		}
 	},
 	"reverse": {
@@ -169,7 +220,7 @@ var commands = {
 		usage: "[text]", deleteCommand: true, cooldown: 5, shouldDisplay: false,
 		process: function(bot, msg, suffix) {
 			var allowChannel = bot.channels.get("id", "95687096504680448");
-			if (!allowChannel) { bot.sendMessage(msg, "`You can only reverse words in` __**#post-office**__", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); });
+			if (!allowChannel) { bot.sendMessage(msg, "<:Bot:230821190648856577> `You can only reverse words in` __**#post-office**__", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); });
 			} else {
 				if (suffix) { bot.sendMessage(msg, "\u202e " + suffix); }
 			}
@@ -179,13 +230,13 @@ var commands = {
 		desc: "Returns your ID (or the channel's)",
 		usage: "[channel]", deleteCommand: true, cooldown: 2, shouldDisplay: false,
 		process: function(bot, msg, suffix) {
-			if (suffix && suffix.trim().replace("\"", "") === "channel") { bot.sendMessage(msg, "The current channel's ID is: " + msg.channel.id);
-			} else { bot.sendMessage(msg, "Your ID: " + msg.author.id); }
+			if (suffix && suffix.trim().replace("\"", "") === "channel") { bot.sendMessage(msg, "<:Bot:230821190648856577> Channel ID: `" + msg.channel.id + "`");
+			} else { bot.sendMessage(msg, "<:Bot:230821190648856577> Your ID: " + msg.author.id); }
 		}
 	},
 	"beep": {
 		desc: "boop", usage: "", deleteCommand: false, cooldown: 2,
-		process: (bot, msg, suffix) => { bot.sendMessage(msg, "boop    |    Here's how long it took me to boop: " + (new Date() - msg.timestamp) + "ms"); }
+		process: (bot, msg, suffix) => { bot.sendMessage(msg, "<:Bot:230821190648856577>boop!\nTime taken: " + (new Date() - msg.timestamp) + "ms"); }
 	},
 	"ping": {
 		desc: "Replies with pong.",
@@ -193,79 +244,32 @@ var commands = {
 		process: function(bot, msg) {
 			var timeTaken = new Date();
 			var n = Math.floor(Math.random() * 6);
-			if (n === 0) { bot.sendMessage(msg, "pong    |    Here's how long it took me to pong you: " + (timeTaken - msg.timestamp) + "ms");
-			} else if (n === 1) { bot.sendMessage(msg, "Ping-Pong.    |    Here's how long it took me to pong you: " + (timeTaken - msg.timestamp) + "ms");
-			} else if (n === 2) { bot.sendMessage(msg, "pong!    |    Here's how long it took me to pong you: " + (timeTaken - msg.timestamp) + "ms");
-			} else if (n === 3) { bot.sendMessage(msg, "dude pong    |    Here's how long it took me to pong you: " + (timeTaken - msg.timestamp) + "ms");
-			} else if (n === 4) { bot.sendMessage(msg, "uh...pong    |    Here's how long it took me to pong you: " + (timeTaken - msg.timestamp) + "ms");
-			} else if (n === 5) { bot.sendMessage(msg, config.command_prefix + "ping! Hah!    |    Here's how long it took me to pong you: " + (timeTaken - msg.timestamp) + "ms"); }
-		}
-	},
-	"join": {
-		desc: "Accepts an invite.",
-		usage: "[invite link] [-a (announce presence)]",
-		deleteCommand: true,
-		process: function(bot, msg, suffix) {
-			if (suffix) {
-				var invites = suffix.split(" ");
-				invites.map(function(invite) {
-					if (/https?:\/\/discord\.gg\/[A-Za-z0-9]+/.test(invite)) {
-						var cServers = [];
-						bot.servers.map(function(srvr) { cServers.push(srvr.id); });
-						bot.joinServer(invite, function(err, server) {
-							if (err) {
-								bot.sendMessage(msg, "⚠ Failed to join: " + err);
-								console.log(colors.cWarn(" WARN ") + err);
-							} else if (cServers.indexOf(server.id) > -1) {
-								console.log("Already in server");
-								bot.sendMessage(msg, "I'm already there, dude!");
-							} else {
-								if (config.use_env) {
-									if (process.env.banned_server_ids && process.env.banned_server_ids.indexOf(server.id) > -1) {
-										console.log(colors.cRed("Joined server but it was on the ban list") + ": " + server.name);
-										bot.sendMessage(msg, "Can't join this server. PrimalMew doesn't allow it...");
-										bot.leaveServer(server);
-										return;
-									}
-								} else {
-									if (config.banned_server_ids && config.banned_server_ids.indexOf(server.id) > -1) {
-										console.log(colors.cRed("Joined server but it was on the ban list") + ": " + server.name);
-										bot.sendMessage(msg, "Can't join this server. PrimalMew doesn't allow it...");
-										bot.leaveServer(server);
-										return;
-									}
-								}
-								console.log(colors.cGreen("Joined server: ") + server.name);
-								bot.sendMessage(msg, "SleepyBot has successfully joined ***" + server.name + "***");
-								if (suffix.indexOf("-a") != -1) {
-									var toSend = [];
-									toSend.push("Greetings! I'm **" + bot.user.username + "**. " + msg.author + " invited me here.");
-									toSend.push("You can use *help to get a list of commands.");
-									toSend.push("If you don't want me here, you can use *leave to make me leave.");
-									bot.sendMessage(server.defaultChannel, toSend);
-								} else { setTimeout(function() { bot.sendMessage(server.defaultChannel, "*Joined on request of " + msg.author + "*"); }, 2000); }
-							}
-						});
-					}
-				});
-			} else { bot.sendMessage(msg, correctUsage("join")); }
+			if (n === 0) { bot.sendMessage(msg, "<:Bot:230821190648856577> pong!\nHere's how long it took me to pong you: " + (timeTaken - msg.timestamp) + "ms");
+			} else if (n === 1) { bot.sendMessage(msg, "<:Bot:230821190648856577> Ping-Pong.\nHere's how long it took me to pong you: " + (timeTaken - msg.timestamp) + "ms");
+			} else if (n === 2) { bot.sendMessage(msg, "<:Bot:230821190648856577> pong.\nHere's how long it took me to pong you: " + (timeTaken - msg.timestamp) + "ms");
+			} else if (n === 3) { bot.sendMessage(msg, "<:Bot:230821190648856577> dude, like, pong.\nHere's how long it took me to pong you: " + (timeTaken - msg.timestamp) + "ms");
+			} else if (n === 4) { bot.sendMessage(msg, "<:Bot:230821190648856577> uh...pong?\nHere's how long it took me to pong you: " + (timeTaken - msg.timestamp) + "ms");
+			} else if (n === 5) { bot.sendMessage(msg, config.command_prefix + "ping! Hah!\nHere's how long it took me to pong you: " + (timeTaken - msg.timestamp) + "ms"); }
 		}
 	},
 	"about": {
-		desc: "About SleepyBot",
+		desc: "About SleepyBot.",
 		deleteCommand: true, cooldown: 10, usage: "",
 		process: function(bot, msg, suffix) {
-			bot.sendMessage(msg, "Hey! I'm " + bot.user.username + "! I was created by PrimalMew in service to Sleepy. Lord of all.");
+			bot.sendMessage(msg, "<:Bot:230821190648856577> Hey! I'm " + bot.user.username + "! I was created by PrimalMew in service to Sleepy. Lord of all.");
 		}
 	},
 	"quote": {
 		desc: "Make SleepyBot say one of the listed quotes!",
-		deleteCommand: true,
+		deleteCommand: false,
 		usage: "[none] or specify [number]",
 		cooldown: 3,
 		process: function (bot, msg, suffix) {
-			if (suffix && /^\d+$/.test(suffix) && quotes.length >= parseInt(suffix) - 1) {bot.sendMessage(msg, quotes[suffix - 1]);}
-			else {bot.sendMessage(msg, quotes[Math.floor(Math.random() * (quotes.length))]);}
+			if (suffix === "0") {
+				bot.sendMessage(msg, "<:Bot:230821190648856577> `QUOTE`: Hey - SleepyJirachi [Super Mario Sunshine] `[11/04/2015]`");
+			}else if (suffix && /^\d+$/.test(suffix) && quotes.length >= parseInt(suffix) - 1) {bot.sendMessage(msg, quotes[suffix - 1]);}
+			else {bot.sendMessage(msg, "<:Bot:230821190648856577> " + quotes[Math.floor(Math.random() * (quotes.length))]);}
+			
 		}
 	},
 	"dice": {
@@ -279,7 +283,7 @@ var commands = {
 			request("https://rolz.org/api/?" + dice + ".json", function(err, response, body) {
 				if (!err && response.statusCode == 200) {
 					var roll = JSON.parse(body);
-					if (roll.details == null) { bot.sendMessage(msg, roll.result, function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+					if (roll.details == null) { bot.sendMessage(msg, "<:Bot:230821190648856577> " + roll.result, function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
 					if (roll.details.length <= 100) { bot.sendMessage(msg, "🎲 Your **" + roll.input + "** resulted in " + roll.result + " " + roll.details);
 					} else { bot.sendMessage(msg, "🎲 Your **" + roll.input + "** resulted in " + roll.result); }
 				} else { console.log(colors.cWarn(" WARN ") + "Got an error: " + err + ", status code: ", response.statusCode); }
@@ -296,9 +300,584 @@ var commands = {
 			try {
 				if (suffix && /\d+/.test(suffix)) { roll = parseInt(suffix.replace(/[^\d]/g, "")); }
 			} catch (err) { console.log(colors.cError(" ERROR ") + err); bot.sendMessage(msg, "⚠ Error parsing suffix into int", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); }
-			bot.sendMessage(msg, msg.author.username + " rolled **1-" + roll + "** and got " + Math.floor((Math.random() * (roll)) + 1));
+			bot.sendMessage(msg, "<:Bot:230821190648856577> " + msg.author.username + " rolled **1-" + roll + "** and got " + Math.floor((Math.random() * (roll)) + 1));
 		}
 	},
+	"pgostatus": {
+		desc: "Checks and announces Pok�mon Go server status.",
+		deleteCommand: false,
+		usage: "",
+		cooldown: 3,
+		process: function(bot, msg, suffix) {
+			var goURL = "sso.pokemon.com";
+			//130.211.188.132 | pgorelease.niaticlabs.com
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", goURL, false);
+			xhr.send(null);
+			if (xhr.status == 200) {
+				bot.sendMessage(msg, "<:Bot:230821190648856577> Checking...", (e, sentMsg) => {
+					bot.updateMessage(sentMsg, "<:Bot:230821190648856577> **Google **__**Pokemon Go**__ server status: `Online`\n\n**PTC** __**Pokemon Go**__ server status: `Online`")});
+			} else {
+				var choice = Math.floor(Math.random() * 6);
+				if (choice == 0) {
+					bot.sendMessage(msg, "<:Bot:230821190648856577>Checking...", (e, sentMsg) => {
+						setTimeout(() => {
+							bot.updateMessage(sentMsg, "<:Bot:230821190648856577> **Google **__**Pokemon Go**__ server status: `Online`\n\n**PTC** __**Pokemon Go**__ server status: `Online`")
+						},2500);
+					});
+				} else if (choice == 1) {
+					bot.sendMessage(msg, "<:Bot:230821190648856577> Checking...", (e, sentMsg) => {
+						setTimeout(() => {
+							bot.updateMessage(sentMsg, "<:Bot:230821190648856577> **Google **__**Pokemon Go**__ server status: `Online`\n\n**PTC** __**Pokemon Go**__ server status: `Online`")
+						},2500);
+					});
+				} else if (choice == 2) {
+					bot.sendMessage(msg, "<:Bot:230821190648856577> Checking...", (e, sentMsg) => {
+						setTimeout(() => {
+							bot.updateMessage(sentMsg, "<:Bot:230821190648856577> **Google **__**Pokemon Go**__ server status: `Online`\n\n**PTC** __**Pokemon Go**__ server status: `Online`")
+						},2500);
+					});
+				} else if (choice == 3) {
+					bot.sendMessage(msg, "<:Bot:230821190648856577> Checking...", (e, sentMsg) => {
+						setTimeout(() => {
+							bot.updateMessage(sentMsg, "<:Bot:230821190648856577> **Google **__**Pokemon Go**__ server status: `Online`\n\n**PTC** __**Pokemon Go**__ server status: `Online`")
+						},2500);
+					});
+				} else if (choice == 4) {
+					bot.sendMessage(msg, "<:Bot:230821190648856577> Checking...", (e, sentMsg) => {
+						setTimeout(() => {
+							bot.updateMessage(sentMsg, "<:Bot:230821190648856577> **Google **__**Pokemon Go**__ server status: `Online`\n\n**PTC** __**Pokemon Go**__ server status: `Online`")
+						},2750);
+					});
+				} else if (choice == 5) {
+					bot.sendMessage(msg, "<:Bot:230821190648856577> Checking...", (e, sentMsg) => {
+						setTimeout(() => {
+							bot.updateMessage(sentMsg, "<:Bot:230821190648856577> **Google **__**Pokemon Go**__ server status: `Online`\n\n**PTC** __**Pokemon Go**__ server status: `Online`")
+						},3000);
+					});
+				}
+			}
+		}
+	},
+	"pgo": {
+		desc: "Choose your team! POKEMON GO!",
+		deleteCommand: true,
+		usage: "[team]",
+		cooldown: 10,
+		process: function(bot, msg, suffix) {
+			if (suffix) {
+				setTimeout(() => {
+					var roleExplore = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "explorer" });
+					if (!bot.memberHasRole(msg.author, roleExplore)) {
+						bot.addMemberToRole(msg.author, roleExplore, err => {
+							if(err) console.log(err);
+						});
+						bot.sendMessage(msg, "<:Bot:230821190648856577> *You've been given the* `Explorer` *role*.\nTalk about **Pokemon GO** in <#200409918069669899>.", function(erro, message) { bot.deleteMessage(message, {"wait": 20000}); });
+					}
+				},1000); 
+				
+				//~~~~~ VALOR//Team Valor = 201803051906891776
+				if (suffix === "valor") {
+					
+					if (bot.memberHasRole(msg.author, "201803224641044480")) {
+						bot.sendMessage(msg, "<:Bot:230821190648856577> You can't become <:goValor:210768762591379456> `Team Valor`!\n*You're already in <:goMystic:210768814349090816> `Team Mystic`.*", function(erro, message) { bot.deleteMessage(message, {"wait": 5000}); });
+						return;
+					}
+					
+					
+					
+					if (bot.memberHasRole(msg.author, "201803270321209345")) {
+						bot.sendMessage(msg, "<:Bot:230821190648856577> You can't become <:goValor:210768762591379456> `Team Valor`!\n*You're already in <:goInstinct:210768863070126082> `Team Instinct`.*", function(erro, message) { bot.deleteMessage(message, {"wait": 5000}); });
+						return;
+					}
+					
+					setTimeout(() => {
+						if (!bot.memberHasRole(msg.author, "201803051906891776")) {
+							bot.addMemberToRole(msg.author, "201803051906891776", err => {
+								if(err) console.log(err);
+							});
+							bot.sendMessage(msg, "<:Bot:230821190648856577> __Welcome__ to <:goValor:210768762591379456> `Team Valor`, **" + msg.author.name + "**!", function(erro, message) { bot.deleteMessage(message, {"wait": 20000}); });
+						} else { bot.sendMessage(msg, "<:Bot:230821190648856577> Dude, you're already part of another team!", function(erro, message) { bot.deleteMessage(message, {"wait": 5000}); }); }
+					},500); 
+				}
+				//VALOR END ~~~~~~~~~~//
+				
+				//
+				
+				//~~~~~ MYSTIC//Team Mystic = 201803224641044480
+				if (suffix === "mystic") {
+					
+					if (bot.memberHasRole(msg.author, "201803051906891776")) {
+						bot.sendMessage(msg, "<:Bot:230821190648856577> You can't become <:goMystic:210768814349090816> `Team Mystic`!\n*You're already in <:goValor:210768762591379456> `Team Valor`.*", function(erro, message) { bot.deleteMessage(message, {"wait": 5000}); });
+						return;
+					}
+					
+					if (bot.memberHasRole(msg.author, "201803270321209345")) {
+						bot.sendMessage(msg, "<:Bot:230821190648856577> You can't become <:goMystic:210768814349090816> `Team Mystic`!\n*You're already in <:goInstinct:210768863070126082> `Team Instinct`.*", function(erro, message) { bot.deleteMessage(message, {"wait": 5000}); });
+						return;
+					}
+					
+					setTimeout(() => {
+						if (!bot.memberHasRole(msg.author, "201803224641044480")) {
+							bot.addMemberToRole(msg.author, "201803224641044480", err => {
+								if(err) console.log(err);
+							});
+							bot.sendMessage(msg, "<:Bot:230821190648856577> __Welcome__ to <:goMystic:210768814349090816> `Team Mystic`, **" + msg.author.name + "**!", function(erro, message) { bot.deleteMessage(message, {"wait": 20000}); });
+						} else { bot.sendMessage(msg, "<:Bot:230821190648856577> Dude, you're already part of another team!", function(erro, message) { bot.deleteMessage(message, {"wait": 5000}); }); }
+					},500); 
+				}
+				//MYSTIC END ~~~~~~~~~~//
+				
+				//
+				
+				//~~~~~ INSTINCT//Team Instinct = 201803270321209345
+				if (suffix === "instinct") {
+					
+					if (bot.memberHasRole(msg.author, "201803051906891776")) {
+						bot.sendMessage(msg, "<:Bot:230821190648856577> You can't become <:goInstinct:210768863070126082> `Team Instinct`!\n*You're already in <:goValor:210768762591379456>  `Team Valor`.*", function(erro, message) { bot.deleteMessage(message, {"wait": 5000}); });
+						return;
+					}
+					
+					
+					
+					if (bot.memberHasRole(msg.author, "201803224641044480")) {
+						bot.sendMessage(msg, "<:Bot:230821190648856577> You can't become <:goInstinct:210768863070126082> `Team Instinct`!\n*You're already in <:goMystic:210768814349090816> `Team Mystic`.*", function(erro, message) { bot.deleteMessage(message, {"wait": 5000}); });
+						return;
+					}
+					
+					setTimeout(() => {
+						if (!bot.memberHasRole(msg.author, "201803270321209345")) {
+							bot.addMemberToRole(msg.author, "201803270321209345", err => {
+								if(err) console.log(err);
+							});
+							bot.sendMessage(msg, "<:Bot:230821190648856577> __Welcome__ to <:goInstinct:210768863070126082> `Team Instinct`, **" + msg.author.name + "**!", function(erro, message) { bot.deleteMessage(message, {"wait": 20000}); });
+						} else { bot.sendMessage(msg, "<:Bot:230821190648856577> Dude, you're already part of another team!", function(erro, message) { bot.deleteMessage(message, {"wait": 5000}); }); }
+					},500); 
+				}
+				//INSTINCT END ~~~~~~~~~~//
+				
+				//~~~~~ HELP WITH COMMAND
+				if (suffix === "help") {
+					bot.sendMessage(msg, "<:Bot:230821190648856577> Hey, " + msg.sender + "!\nYou've executed the `*pgo` help command.\n```Here's some information you may need:```\n**1.** __If you'd like to join__ `Team Valor` __type__ `*pgo valor`.\n**2.** __If you'd like to join__ `Team Mystic` __type__ `*pgo mystic`.\n**3.** __If you'd like to join__ `Team Instinct` __type__ `*pgo instinct`.\n**4.** __You can't join more than one team. Not possible. Just try it.__\n**5.** __If you want to change teams for some weird reason, consult with lord Sleepy.__\n**6.** __Use__ `*pgo suggest [your suggestion]` __to submit a suggestion about the__ `*pgo` __command__.");
+				}
+				//END HELP ~~~~~~~~~~//
+				
+				//~~~~~ Who on what teams
+				if (suffix === "teams") {
+					var roleValor = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "team valor" });
+					var roleMystic = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "team mystic" });
+					var roleInstinct = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "team instinct" });
+					var roleExp = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "explorer" });
+					bot.sendMessage(msg, "<:Bot:230821190648856577> \n<:goValor:230678492176580609> **Team Valor**: `" + msg.channel.server.usersWithRole(roleValor).length + "`\n<:goMystic:230678530961178624> **Team Mystic**: `" + msg.channel.server.usersWithRole(roleMystic).length + "`\n<:goInstinct:230678550347382784> **Team Instinct**: `" + msg.channel.server.usersWithRole(roleInstinct).length + "`\n**Total Explorers**: `" + msg.channel.server.usersWithRole(roleExp).length + "`");
+				}
+				//TEAMS end ~~~~~~~~~~//
+			} else { bot.sendMessage(msg, "<:Bot:230821190648856577> Please specify which team you are in, **" + msg.author.name + "**!\n|\n**Example**: `*pgo valor`", function(erro, message) { bot.deleteMessage(message, {"wait": 15000}); }); }
+		}
+	},
+	
+	//SUN AND MOON STUFF //
+	
+	"sun": {
+		desc: "You have sun?",
+		deleteCommand: true,
+		usage: "",
+		cooldown: 3,
+		process: function(bot, msg, suffix) {
+			if (bot.memberHasRole(msg.author, "249274967500259329")) {
+				bot.sendMessage(msg, "<:Bot:230821190648856577> **You've already stated that you got Moon.** `Ask Sleepy if you'd like to switch.`", function(erro, message) { bot.deleteMessage(message, {"wait": 5000}); });
+				return;
+			}
+			
+			setTimeout(() => {
+				if (!bot.memberHasRole(msg.author, "249274769495556096")) {
+					bot.addMemberToRole(msg.author, "249274769495556096", err => {
+						if(err) console.log(err);
+					});
+					bot.sendMessage(msg, "<:Bot:230821190648856577> **You've chosen Sun!**\nWelcome to the light, " + msg.author.name + "!", function(erro, message) { bot.deleteMessage(message, {"wait": 20000}); });
+				} else { bot.sendMessage(msg, "<:Bot:230821190648856577> *But you're already Sun dude.*", function(erro, message) { bot.deleteMessage(message, {"wait": 5000}); }); }
+			},500); 
+		}
+	},
+	"moon": {
+		desc: "You have moon?",
+		deleteCommand: true,
+		usage: "",
+		cooldown: 3,
+		process: function(bot, msg, suffix) {
+			if (bot.memberHasRole(msg.author, "249274769495556096")) {
+				bot.sendMessage(msg, "<:Bot:230821190648856577> **You've already stated that you got Sun.** `Ask Sleepy if you'd like to switch.`", function(erro, message) { bot.deleteMessage(message, {"wait": 5000}); });
+				return;
+			}
+			
+			setTimeout(() => {
+				if (!bot.memberHasRole(msg.author, "249274967500259329")) {
+					bot.addMemberToRole(msg.author, "249274967500259329", err => {
+						if(err) console.log(err);
+					});
+					bot.sendMessage(msg, "<:Bot:230821190648856577> **You've chosen Moon!**\nWelcome to the darkness, " + msg.author.name + "!", function(erro, message) { bot.deleteMessage(message, {"wait": 20000}); });
+				} else { bot.sendMessage(msg, "<:Bot:230821190648856577> *But you're already Moon dude.*", function(erro, message) { bot.deleteMessage(message, {"wait": 5000}); }); }
+			},500); 
+		}
+	},
+	
+	"sunvsmoon": {
+		desc: "Who's winning?",
+		deleteCommand: true,
+		usage: "",
+		cooldown: 3,
+		process: function(bot, msg, suffix) {
+			var roleSun = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "sun" });
+			var roleMoon = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "moon" });
+			bot.sendMessage(msg, "<:Bot:230821190648856577> \n<:Sun:231085009593696256> **Sun**: `" + msg.channel.server.usersWithRole(roleSun).length + "`\n<:Moon:231085042347016194> **Moon**: `" + msg.channel.server.usersWithRole(roleMoon).length + "`");
+	
+		}
+	},
+	"moonvssun": {
+		desc: "Who's winning?",
+		deleteCommand: true,
+		usage: "",
+		cooldown: 3,
+		process: function(bot, msg, suffix) {
+			var roleSun = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "sun" });
+			var roleMoon = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "moon" });
+			bot.sendMessage(msg, "<:Bot:230821190648856577> \n<:Sun:231085009593696256> **Sun**: `" + msg.channel.server.usersWithRole(roleSun).length + "`\n<:Moon:231085042347016194> **Moon**: `" + msg.channel.server.usersWithRole(roleMoon).length + "`");
+	
+		}
+	},
+	
+	// SUN AND MOON STUFF END //
+	
+	"artsuggest": {
+		desc: "Suggest your art to be used by SleepyBot in the morning.",
+		deleteCommand: true,
+		usage: "[attached art]",
+		cooldown: 600,
+		process: function(bot, msg, suffix) {
+			try{
+				var args = suffix.split(" ");
+				var attachments = msg.attachments[0];
+				bot.channels.get("id", 146685904654696448).sendMessage("<:Bot:230821190648856577> [**MORNING ART SUGGESTION**]\n[**"+ msg.author.name + "**](*" + msg.author.id + "*) in channel `" + msg.channel.name + "`(`" + msg.channel.id + "`)\n__**Their Art**__\n" + msg.attachments[0].url);
+				setTimeout(() => {
+					bot.sendMessage(msg, "<:Bot:230821190648856577> Your art suggestion has been sent. :ok:");
+				},2000);
+			}catch(e){
+				bot.sendMessage(msg, "`ERROR` Please report it to <@95687096504680448>! ```js\n"+ e.message + " " + e.stack.split("\n")[4] + "```");
+			}
+		}
+	},
+	"suggest": {
+		desc: "Make a general suggestion about SleepyBot!",
+		deleteCommand: true,
+		usage: "[message]",
+		cooldown: 600,
+		process: function(bot, msg, suffix) {
+			var args = suffix.split(" ");
+			if(args.length >= 2){
+				try{
+					var args = suffix.split(" ");
+					var message = args.splice(null, args.length).join(" ");
+					bot.channels.get("id", 146685904654696448).sendMessage("<:Bot:230821190648856577> [**GENERAL SUGGESTION**]\n[**"+ msg.author.name+ "**](*" +msg.author.id+ "*) in channel `" +msg.channel.name+ "`(`" +msg.channel.id+ "`)\n**They said**: `"+ message + "`");
+					setTimeout(() => {
+						bot.sendMessage(msg, "<:Bot:230821190648856577> Your suggestion has been sent. :ok:");
+					},500);
+				}catch(e){
+					bot.sendMessage(msg, "`ERROR` Please report it to <@95687096504680448>! ```js\n"+ e.message + " " + e.stack.split("\n")[4] + "```");
+				}
+			}
+		}
+	},
+	"pgosuggest": {
+		desc: "Make a suggestion about pokemon go to SleepyBot!",
+		deleteCommand: true,
+		usage: "[message]",
+		cooldown: 600,
+		process: function(bot, msg, suffix) {
+			var args = suffix.split(" ");
+			if(args.length >= 2){
+				try{
+					var args = suffix.split(" ");
+					var message = args.splice(null, args.length).join(" ");
+					bot.channels.get("id", 146685904654696448).sendMessage("<:Bot:230821190648856577> [**POKEMON GO SUGGESTION**]\n[**"+ msg.author.name+ "**](*" +msg.author.id+ "*) in channel `" +msg.channel.name+ "`(`" +msg.channel.id+ "`)\n**They said**: `"+ message + "`");
+					setTimeout(() => {
+						bot.sendMessage(msg, "<:Bot:230821190648856577> Your `*pgo` suggestion has been sent. :ok:");
+					},500);
+				}catch(e){
+					bot.sendMessage(msg, "`ERROR` Please report it to <@95687096504680448>! ```js\n"+ e.message + " " + e.stack.split("\n")[4] + "```");
+				}
+			}
+		}
+	},
+	"jailvote": {
+		desc: "Vote for a criminal to be sent to jail!",
+		deleteCommand: true,
+		usage: "[user]",
+		cooldown: 1800,
+		process: function(bot, msg, suffix) {
+			if (!msg.channel.isPrivate) {
+				if (suffix) {
+					msg.mentions.map(function(usr) {
+						if (msg.mentions.length > 0) {
+							try {
+								var chnl = bot.channels.get("name", "town-hall").id;
+								
+								if (jailIP == 1) {
+									jailVotes += 1;
+									bot.channels.get("id", chnl).sendMessage("```SLEEPYBOT COURT```\nThanks, " + msg.sender + "!\n__Your vote has been counted__.\n**Total Votes Now**: `" + jailVotes + "`\n**Accused**: `" + usr.username + "`");
+								} else {
+									jailVotes += 1;
+									jailIP = 1;
+									setTimeout(() => {
+										bot.channels.get("id", chnl).sendMessage("```SLEEPYBOT COURT```\nA trial against `" + usr.username + "` is now in session, thanks to " + msg.sender + ".\n*The trial will be held for* `30` *minutes*.\nPlease use `*jailvote @" + usr.username + "` to cast your vote against the accused.");
+									}, 500);
+									setTimeout(() => {
+										bot.channels.get("id", chnl).sendMessage("```SLEEPYBOT COURT```\n`25` minutes left until the *accused*, **" + usr.username +"**, gets their sentence.");
+									}, 300000);
+									setTimeout(() => {
+										bot.channels.get("id", chnl).sendMessage("```SLEEPYBOT COURT```\n`20` minutes left until the *accused*, **" + usr.username +"**, gets their sentence.");
+									}, 600000);
+									setTimeout(() => {
+										bot.channels.get("id", chnl).sendMessage("```SLEEPYBOT COURT```\n`15` minutes left until the *accused*, **" + usr.username +"**, gets their sentence.");
+									}, 900000);
+									setTimeout(() => {
+										bot.channels.get("id", chnl).sendMessage("```SLEEPYBOT COURT```\n`10` minutes left until the *accused*, **" + usr.username +"**, gets their sentence.");
+									}, 1200000);
+									setTimeout(() => {
+										bot.channels.get("id", chnl).sendMessage("```SLEEPYBOT COURT```\n`5` minutes left until the *accused*, **" + usr.username +"**, gets their sentence.");
+									}, 1500000);
+									setTimeout(() => {
+										bot.channels.get("id", chnl).sendMessage("```SLEEPYBOT COURT```\n`2` minutes and `30` seconds left until the *accused*, **" + usr.username +"**, gets their sentence.");
+									}, 1650000);
+									setTimeout(() => {
+										if (jailVotes <= 9) {
+											bot.channels.get("id", chnl).sendMessage("```SLEEPYBOT COURT```\n__The results are in.__\nThere were `" + jailVotes + "` total votes.\n**" + usr.username + "** is `NOT GUILTY`.\nThey will not be sent to jail.");
+											bot.sendFile(msg, body, "./images/objection.png");
+											jailVotes = 0;
+											jailIP = 0;
+										} else if (jailVotes >= 10) {
+											var role = msg.channel.server.roles.find((r) => { return r.name.toLowerCase() === "jailed" });
+											if (!bot.memberHasRole(usr, role)) {
+												bot.addMemberToRole(usr, role);
+											}
+											setTimeout(() => {
+												bot.channels.get("id", chnl).sendMessage("```SLEEPYBOT COURT```\n__The results are in.__\nThere were `" + jailVotes + "` total votes.\n**" + usr.username + "** is `GUILTY`.\nThey have been placed in jail. Lord <@95618471806636032> shall decide their fate.");
+												bot.sendFile(msg, body, "./images/objection_lost.png");
+											}, 500);
+											setTimeout(() => {
+												jailVotes = 0;
+												jailIP = 0;
+											}, 1000);
+										} else { return }
+									}, 1800000);
+								}
+								//jailTrial(bot, msg);
+							} catch (err) { console.log(colors.cError(" ERROR ") + err); }
+						} else { bot.sendMessage(msg, "<:Bot:230821190648856577> __Please specify the user.__"); }
+					});
+				} else { bot.sendMessage(msg, "<:Bot:230821190648856577> **Total Votes**: `" + jailVotes + "`\n**Accused**: `" + usrr.username + "`"); }
+			} else { bot.sendMessage(msg, "`DENIED` - You must do this is Sleepy Town, dude."); }
+		}
+	},
+	"dbtest": {
+		desc: "test",
+		deleteCommand: true, cooldown: 10, usage: "",
+		process: function(bot, msg, suffix) {
+			try{
+				var data = db.getData("/test2/my/test");
+			} catch(e) {
+				console.log(e);
+			}
+			db.push("/fcdb/users/" + msg.author.id, msg.author.id);
+			db.push("/fcdb/usernames/" + msg.author.name, msg.author.id);
+			db.push("/fcdb/" + msg.author.id + "/", "Not known. Ask them to specify with *fc define [their FC]");
+		}
+	},
+	"votefor": {
+		desc: "Vote for Sun or Moon!",
+		deleteCommand: false,
+		cooldown: 30,
+		usage: "[sun or moon]",
+		process: function(bot, msg, suffix) {
+			if (suffix === "sun") {
+				try{
+					var datausers = db.getData("/smvote/users/" + msg.author.id);
+				} catch(e) {
+					console.log(e);
+				}
+				
+				if (msg.author.id == datausers) {
+					var datasun = db.getData("/smvote/sun/votes");
+					bot.sendMessage(msg, "<:Bot:230821190648856577> **Thanks** but you already *voted*, " + msg.author.name + ".\nTotal votes for **Sun** so far: `" + datasun + "`");
+				} else {
+					try{
+						var datasun = db.getData("/smvote/sun/votes");
+					} catch(e) {
+						console.log(e);
+					}
+					var user = msg.author.id;
+					db.push("/smvote/sun/votes", datasun + 1);
+					db.push("/smvote/users/" + msg.author.id, msg.author.id);
+					try{
+						var datasun = db.getData("/smvote/sun/votes");
+					} catch(e) {
+						console.log(e);
+					}
+					setTimeout(() => {
+						bot.sendMessage(msg, "<:Bot:230821190648856577> **Thank you** for your *vote*, " + msg.author.name + "!\n__You voted for__ `Sun`.\nTotal votes for **Sun** so far: `" + datasun + "`");
+					}, 1500);
+				}
+			} else if (suffix === "moon") {
+				try{
+					var datausers = db.getData("/smvote/users/" + msg.author.id);
+				} catch(e) {
+					console.log(e);
+				}
+				
+				if (msg.author.id == datausers) {
+					var datamoon = db.getData("/smvote/moon/votes");
+					bot.sendMessage(msg, "<:Bot:230821190648856577> **Thanks** but you already *voted*, " + msg.author.name + ".\nTotal votes for **Moon** so far: `" + datamoon + "`");
+				} else {
+					try{
+						var datamoon = db.getData("/smvote/moon/votes");
+					} catch(e) {
+						console.log(e);
+					}
+					var user = msg.author.id;
+					db.push("/smvote/moon/votes", datamoon + 1);
+					db.push("/smvote/users/" + msg.author.id, msg.author.id);
+					try{
+					var datamoon = db.getData("/smvote/moon/votes");
+					} catch(e) {
+						console.log(e);
+					}
+					setTimeout(() => {
+						bot.sendMessage(msg, "<:Bot:230821190648856577> **Thank you** for your *vote*, " + msg.author.name + "!\n__You voted for__ `Moon`.\nTotal votes for **Moon** so far: `" + datamoon + "`");
+					}, 1550);
+				}
+			} else if (suffix === "votes") {
+				try{
+					var datamoon = db.getData("/smvote/moon/votes");
+				} catch(e) {
+					console.log(e);
+				}
+				
+				try{
+					var datasun = db.getData("/smvote/sun/votes");
+				} catch(e) {
+					console.log(e);
+				}
+				var toSend = [];
+				toSend.push("<:Bot:230821190648856577> __Total votes__ for **Pokemon Moon** *so far*: `" + datamoon + "`");
+				toSend.push("<:Bot:230821190648856577> __Total votes__ for **Pokemon Sun** so far: `" + datasun + "`");
+				bot.sendMessage(msg, toSend);
+			}
+		}
+	},
+	"fc": {
+		desc: "Get another user or your Friend Code.",
+		deleteCommand: false,
+		cooldown: 30,
+		usage: "[user] or [define]",
+		process: function(bot, msg, suffix) {
+			var args = suffix.split(" ");
+			if (suffix.length > 1) {
+				try{
+					var datausers = db.getData("/fcdb/users/" + msg.author.id);
+				} catch(e) {
+					console.log(e);
+				}
+				
+				if (msg.author.id == datausers) {
+					var datafc = db.getData("/fcdb/" + msg.author.id + "/");
+					bot.sendMessage(msg, "<:Bot:230821190648856577> " + msg.author.name + "'s FC is `" + datafc + "`");
+				} else {
+					try{
+						var datafc = db.getData("/fcdb/" + msg.author.id + "/");
+					} catch(e) {
+						console.log(e);
+					}
+					var user = msg.author.id;
+					db.push("/fcdb/" + msg.author.id + "/", "Not known. Ask them to specify with *fc define [their FC]");
+					db.push("/fcdb/users/" + msg.author.id, msg.author.id);
+					setTimeout(() => {
+						db.push("/fcdb/usernames/" + msg.author.name, msg.author.id);
+					}, 500);
+					try{
+						var datafc = db.getData("/fcdb/" + msg.author.id + "/");
+					} catch(e) {
+						console.log(e);
+					}
+					setTimeout(() => {
+						bot.sendMessage(msg, "<:Bot:230821190648856577> They haven't specified their FC yet. Ask them to use the command `*fc define [their FC]`.");
+					}, 1500);
+				}
+			} else if (suffix === "define") {
+				
+				if(args.length >= 3){
+					bot.sendMessage(msg, "<:Bot:230821190648856577> *Please use the following format when submitting your FC.*\n`*fc define 0000-0000-0000`");
+				} else {
+					try{
+						var datausers = db.getData("/fcdb/users/" + msg.author.id);
+					} catch(e) {
+						console.log(e);
+					}
+				
+					if (msg.author.id == datausers) {
+						var datafc = db.getData("/fcdb/" + msg.author.id + "/");
+						bot.sendMessage(msg, "<:Bot:230821190648856577> FC not yet defined. **Please define it.**");
+					} else {
+						try{
+							var datafc = db.getData("/fcdb/" + msg.author.id + "/");
+						} catch(e) {
+							console.log(e);
+						}
+						var args = suffix.split(" ");
+						var user = msg.author.id;
+						db.push("/fcdb/" + msg.author.id + "/", "Not known. Ask them to specify with *fc define [their FC]");
+						db.push("/fcdb/users/" + msg.author.id, msg.author.id);
+						setTimeout(() => {
+							db.push("/fcdb/usernames/" + msg.author.name, msg.author.id);
+						}, 500);
+						try{
+							var datafc = db.getData("/fcdb/" + msg.author.id + "/");
+						} catch(e) {
+							console.log(e);
+						}
+						setTimeout(() => {
+							bot.sendMessage(msg, "<:Bot:230821190648856577> FC set to `" + datafc +"`");
+						}, 1500);
+				 	}
+				}
+			} else { return; }
+		}
+	},
+	//POKEINFO command temporarily out of service until i figure out how to make it work.
+	
+	/*"pokeinfo": {
+		desc: "Get information about the specified Pokemon from the Pokedex.",
+		usage: "[pokemon]",
+		deleteCommand: false,
+		cooldown: 2,
+		shouldDisplay: false,
+		process: function(bot, msg, suffix) {
+			if (suffix && /^\d+$/.test(suffix) >= parseInt(suffix) - 1) {
+				//bot.sendMessage(msg, quotes[suffix - 1]);
+				var toSend = [];
+				toSend.push("**Name**: `" + pokedex.suffix.ename + ".`");
+				toSend.push("**Type(s)**: `" + pokedex.suffix.type + "`");
+				toSend.push("**Dex #**: `" + pokedex.suffix.id + "`");
+				toSend.push("**Base Stats**:");
+				toSend.push("    __HP__: `" + pokedex.suffix.base.HP + "`");
+				toSend.push("    __Attack__: `" + pokedex.suffix.base.Attack + "`");
+				toSend.push("    __Defense__: `" + pokedex.suffix.base.Defense + "`");
+				toSend.push("    __Sp. Attack__: `" + pokedex.suffix.base.Sp.Atk + "`");
+				toSend.push("    __Sp. Defense__: `" + pokedex.suffix.base.Sp.Def + "`");
+				toSend.push("    __Speed__: `" + pokedex.suffix.base.Speed + "`");
+				
+				bot.sendMessage(msg, toSend);
+			} else { bot.sendMessage(msg, correctUsage("pokeinfo"), (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 10000}); }); }
+		}
+	},*/
+	
 	"info": {
 		desc: "Gets info on the server or a user if mentioned.",
 		usage: "[username]",
@@ -308,8 +887,8 @@ var commands = {
 			if (!msg.channel.isPrivate) {
 				if (suffix) {
 					if (msg.mentions.length > 0) {
-						if (msg.everyoneMentioned) { bot.sendMessage(msg, "Woah, " + msg.author.username + ", calm down please. You can't get details on everyone at the same time, dude!", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
-						if (msg.mentions.length > 4) { bot.sendMessage(msg, "4 user limit.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+						if (msg.everyoneMentioned) { bot.sendMessage(msg, "<:Bot:230821190648856577> Woah, " + msg.author.username + ", calm down please. You can't get details on everyone at the same time, dude!", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+						if (msg.mentions.length > 4) { bot.sendMessage(msg, "<:Bot:230821190648856577> 4 user limit.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
 						msg.mentions.map(function(usr) {
 							var toSend = [], count = 0;
 							toSend.push("ℹ on " + usr.username + " (" + usr.discriminator + ")");
@@ -330,12 +909,12 @@ var commands = {
 							bot.servers.map((server) => { if (server.members.indexOf(usr) > -1) { count += 1; } });
 							if (count > 1) { toSend.push("Playing on **" + count + "** other servers."); }
 							if (usr.avatarURL != null) { toSend.push("**Avatar:** `" + usr.avatarURL + "`"); }
-							bot.sendMessage(msg, toSend);
+							bot.sendMessage(msg, "<:Bot:230821190648856577>\n" + toSend);
 						});
 					} else {
-						if (msg.everyoneMentioned) { bot.sendMessage(msg, "Woah, " + msg.author.username + ", calm down dude", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+						if (msg.everyoneMentioned) { bot.sendMessage(msg, "<:Bot:230821190648856577> Woah, " + msg.author.username + ", calm down dude", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
 						var users = suffix.split(/, ?/);
-						if (users.length > 4) { bot.sendMessage(msg, "4 user limit.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+						if (users.length > 4) { bot.sendMessage(msg, "<:Bot:230821190648856577> 4 user limit.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
 						users.map(function(user) {
 							var usr = findUser(msg.channel.server.members, user);
 							if (usr) {
@@ -358,8 +937,8 @@ var commands = {
 								bot.servers.map((server) => { if (server.members.indexOf(usr) > -1) { count += 1; } });
 								if (count > 1) { toSend.push("Playing on **" + count + "** other servers."); }
 								if (usr.avatarURL != null) { toSend.push("**Avatar:** `" + usr.avatarURL + "`"); }
-								bot.sendMessage(msg, toSend);
-							} else bot.sendMessage(msg, "User \"" + user + "\" not found.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 15000}); });
+								bot.sendMessage(msg, "<:Bot:230821190648856577>\n" + toSend);
+							} else bot.sendMessage(msg, "<:Bot:230821190648856577> User \"" + user + "\" not found.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 15000}); });
 						});
 					}
 				} else {
@@ -376,9 +955,9 @@ var commands = {
 					toSend.push("**Default Channel:** " + msg.channel.server.defaultChannel);
 					toSend.push("**Current Channel's ID:** " + msg.channel.id);
 					toSend.push("**Server Icon:** `" + msg.channel.server.iconURL + "`");
-					bot.sendMessage(msg, toSend);
+					bot.sendMessage(msg, "<:Bot:230821190648856577>\n" + toSend);
 				}
-			} else bot.sendMessage(msg, "Unavailable in Direct Messages...", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 8000}); });
+			} else bot.sendMessage(msg, "<:Bot:230821190648856577> Unavailable in Direct Messages...", (erro, wMessage) => { bot.deleteMessage(wMessage, {"wait": 8000}); });
 		}
 	},
 	"avatar": {
@@ -388,24 +967,24 @@ var commands = {
 		cooldown: 6,
 		process: function(bot, msg, suffix) {
 			if (msg.channel.isPrivate) {
-				if (msg.author.avatarURL != null) { bot.sendMessage(msg, "I can get your avatar only in the DMs. Here you go: " + msg.author.avatarURL); return; }
-				if (msg.author.avatarURL == null) { bot.sendMessage(msg, "I can get your avatar only in the DMs, but you don't have one with me."); return; }
+				if (msg.author.avatarURL != null) { bot.sendMessage(msg, "<:Bot:230821190648856577> I can get your avatar only in the DMs. Here you go: " + msg.author.avatarURL); return; }
+				if (msg.author.avatarURL == null) { bot.sendMessage(msg, "<:Bot:230821190648856577> I can get your avatar only in the DMs, but you don't have one with me."); return; }
 			}
-			if (msg.mentions.length == 0 && !suffix) { (msg.author.avatarURL != null) ? bot.sendMessage(msg, msg.author.username + "'s avatar is: " + msg.author.avatarURL) : bot.sendMessage(msg, msg.author.username + " has no avatar", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); });
+			if (msg.mentions.length == 0 && !suffix) { (msg.author.avatarURL != null) ? bot.sendMessage(msg, "<:Bot:230821190648856577> " + msg.author.username + "'s avatar is: " + msg.author.avatarURL) : bot.sendMessage(msg, "<:Bot:230821190648856577> " + msg.author.username + " has no avatar", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); });
 			} else if (msg.mentions.length > 0) {
-				if (msg.everyoneMentioned) { bot.sendMessage(msg, "Woah, " + msg.author.username + ", could you calm down?", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
-				if (msg.mentions.length > 6) { bot.sendMessage(msg, "6 user limit.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+				if (msg.everyoneMentioned) { bot.sendMessage(msg, "<:Bot:230821190648856577> Woah, " + msg.author.username + ", could you calm down?", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+				if (msg.mentions.length > 6) { bot.sendMessage(msg, "<:Bot:230821190648856577> 6 user limit.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
 				msg.mentions.map(function(usr) {
-					(usr.avatarURL != null) ? bot.sendMessage(msg, "**" + usr.username + "**'s avatar is: " + usr.avatarURL + "") : bot.sendMessage(msg, "**" + usr.username + "** has no avatar", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); });
+					(usr.avatarURL != null) ? bot.sendMessage(msg, "<:Bot:230821190648856577> **" + usr.username + "**'s avatar is: " + usr.avatarURL + "") : bot.sendMessage(msg, "<:Bot:230821190648856577> **" + usr.username + "** has no avatar", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); });
 				});
 			} else {
-				if (msg.everyoneMentioned) { bot.sendMessage(msg, "Woah, " + msg.author.username + ", calm down yo.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+				if (msg.everyoneMentioned) { bot.sendMessage(msg, "<:Bot:230821190648856577> Woah, " + msg.author.username + ", calm down yo.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
 				var users = suffix.split(/, ?/);
-				if (users.length > 6) { bot.sendMessage(msg, "6 user limt.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+				if (users.length > 6) { bot.sendMessage(msg, "<:Bot:230821190648856577> 6 user limt.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
 				users.map(function(user) {
 					var usr = findUser(msg.channel.server.members, user);
-					if (usr) { (usr.avatarURL != null) ? bot.sendMessage(msg, "**" + usr.username + "**'s avatar is: " + usr.avatarURL + "") : bot.sendMessage(msg, "**" + usr.username + "** has no avatar", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); });
-					} else { bot.sendMessage(msg, "User \"" + user + "\" not found.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 20000}); }); }
+					if (usr) { (usr.avatarURL != null) ? bot.sendMessage(msg, "<:Bot:230821190648856577> **" + usr.username + "**'s avatar is: " + usr.avatarURL + "") : bot.sendMessage(msg, "<:Bot:230821190648856577> **" + usr.username + "** has no avatar", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); });
+					} else { bot.sendMessage(msg, "<:Bot:230821190648856577> User \"" + user + "\" not found.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 20000}); }); }
 				});
 			}
 		}
@@ -421,7 +1000,7 @@ var commands = {
 				bot.sendMessage(msg, correctUsage("choose"), function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); });
 			} else {
 				var choice = Math.floor(Math.random() * (choices.length));
-				bot.sendMessage(msg, "This was a hard decision, but I chose **" + choices[choice] + "**");
+				bot.sendMessage(msg, "<:Bot:230821190648856577> This was a hard decision, but I chose **" + choices[choice] + "**");
 			}
 		}
 	},
@@ -434,20 +1013,20 @@ var commands = {
 			var currentchannel = msg.channel.id;
 			if (msg.everyoneMentioned || suffix.toLowerCase() == "everyone") {
 
-				if (msg.channel.isPrivate) { bot.sendMessage(msg, "Not possible in Direct Messages."); return; }
-				if (LottoDB.hasOwnProperty(msg.channel.id)) { bot.sendMessage(msg, "There can only be one lottery running at a time. There is one currently running.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
-				bot.sendMessage(msg, "Out of " + msg.channel.server.members.length + " members on this server, " + msg.channel.server.members.random().username + " won the lottery! Congratulations!");
+				if (msg.channel.isPrivate) { bot.sendMessage(msg, "<:Bot:230821190648856577> Not possible in Direct Messages."); return; }
+				if (LottoDB.hasOwnProperty(msg.channel.id)) { bot.sendMessage(msg, "<:Bot:230821190648856577> There can only be one lottery running at a time. There is one currently running.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+				bot.sendMessage(msg, "<:Bot:230821190648856577> Out of " + msg.channel.server.members.length + " members on this server, " + msg.channel.server.members.random().username + " won the lottery! Congratulations!");
 
 			} else if (suffix.split(" ")[0] == "new") {
 
-				if (msg.channel.isPrivate) { bot.sendMessage(msg, "Not possible in Direct Messages."); return; }
+				if (msg.channel.isPrivate) { bot.sendMessage(msg, "<:Bot:230821190648856577> Not possible in Direct Messages."); return; }
 				if (suffix.length > 1) {
 					var maxentries = (/^\d+$/.test(suffix.split(" ")[1])) ? parseInt(suffix.split(" ")[1]) : 1;
 				}
 				if (LottoDB.hasOwnProperty(currentchannel)) {
-					bot.sendMessage(msg.channel, "There can only be one lottery running at a time. There is one currently running.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); });
+					bot.sendMessage(msg.channel, "<:Bot:230821190648856577> There can only be one lottery running at a time. There is one currently running.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); });
 				} else {
-					bot.sendMessage(msg, "Lottery has been started by **" + msg.author.username + "** with ***" + maxentries + "*** max entries. Use ***-*lotto enter*** to enter this lottery.");
+					bot.sendMessage(msg, "<:Bot:230821190648856577> Lottery has been started by **" + msg.author.username + "** with ***" + maxentries + "*** max entries. Use ***-*lotto enter*** to enter this lottery.");
 					var object = {"max": maxentries, "msg": msg, "entries": "", "starter": msg.author.id};
 					LottoDB[currentchannel] = [];
 					LottoDB[currentchannel][0] = object;
@@ -456,42 +1035,42 @@ var commands = {
 
 			} else if (suffix.replace(" ", "") == "end") {
 
-				if (msg.channel.isPrivate) { bot.sendMessage(msg, "Not possible in Direct Messages."); return; }
+				if (msg.channel.isPrivate) { bot.sendMessage(msg, "<:Bot:230821190648856577> Not possible in Direct Messages."); return; }
 				if (LottoDB.hasOwnProperty(msg.channel.id)) {
 					if (msg.author.id == LottoDB[currentchannel][0].starter || msg.channel.permissionsOf(msg.author).hasPermission("manageChannel")) {
 						if (LottoDB[currentchannel][0].entries.split(",").length < 3) {
-							bot.sendMessage(msg, "The lottery has ended, however, only one person entered! What?! No winner.");
+							bot.sendMessage(msg, "<:Bot:230821190648856577> The lottery has ended, however, only one person entered! What?! No winner.");
 							delete LottoDB[currentchannel];
 						} else {
 							var winner = msg.channel.server.members.get("id", LottoDB[currentchannel][0].entries.split(",")[Math.floor((Math.random() * (LottoDB[currentchannel][0].entries.split(",").length - 1)) + 1)]);
-							bot.sendMessage(msg, "From **" + (LottoDB[currentchannel][0].entries.split(",").length - 1) + "** entries the winner of this lottery is " + winner);
+							bot.sendMessage(msg, "<:Bot:230821190648856577> From **" + (LottoDB[currentchannel][0].entries.split(",").length - 1) + "** entries the winner of this lottery is " + winner);
 							delete LottoDB[currentchannel];
 						}
-					} else { bot.sendMessage(msg, "You didn't start this lottery. Only the one who started it can end it.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
-				} else { bot.sendMessage(msg, "No lottery in progress at the moment.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+					} else { bot.sendMessage(msg, "<:Bot:230821190648856577> You didn't start this lottery. Only the one who started it can end it.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+				} else { bot.sendMessage(msg, "<:Bot:230821190648856577> No lottery in progress at the moment.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
 
 			} else if (suffix.replace(" ", "") == "enter") {
 
-				if (msg.channel.isPrivate) { bot.sendMessage(msg, "Not possible in Direct Messages."); return; }
+				if (msg.channel.isPrivate) { bot.sendMessage(msg, "<:Bot:230821190648856577> Not possible in Direct Messages."); return; }
 				if (LottoDB.hasOwnProperty(currentchannel)) {
 					if (LottoDB[currentchannel][0].entries.split(",").indexOf(msg.author.id) > -1) {
-						if (LottoDB[currentchannel][0].max < 2) { bot.sendMessage(msg.channel, "You can only enter this lottery **1** time.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
-						if (LottoDB[currentchannel][0].entries.split(",").filter(function(value) { return value == msg.author.id; }).length >= LottoDB[currentchannel][0].max) { bot.sendMessage(msg.channel, "You can only enter this lottery **" + LottoDB[currentchannel][0].max + "** times.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+						if (LottoDB[currentchannel][0].max < 2) { bot.sendMessage(msg.channel, "<:Bot:230821190648856577> You can only enter this lottery **1** time.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+						if (LottoDB[currentchannel][0].entries.split(",").filter(function(value) { return value == msg.author.id; }).length >= LottoDB[currentchannel][0].max) { bot.sendMessage(msg.channel, "<:Bot:230821190648856577> You can only enter this lottery **" + LottoDB[currentchannel][0].max + "** times.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
 						LottoDB[currentchannel][0].entries = LottoDB[currentchannel][0].entries + "," + msg.author.id;
-						bot.sendMessage(msg.channel, "**" + msg.author.username + "** has been given a lottery ticket!" + msg.author.username + "has been added into the lottery draw.");
+						bot.sendMessage(msg.channel, "<:Bot:230821190648856577> **" + msg.author.username + "** has been given a lottery ticket!" + msg.author.username + "has been added into the lottery draw.");
 					} else {
 						LottoDB[currentchannel][0].entries = LottoDB[currentchannel][0].entries + "," + msg.author.id;
-						bot.sendMessage(msg.channel, "**" + msg.author.username + "** has been given a lottery ticket!" + msg.author.username + "has been added into the lottery draw.");
+						bot.sendMessage(msg.channel, "<:Bot:230821190648856577> **" + msg.author.username + "** has been given a lottery ticket!" + msg.author.username + "has been added into the lottery draw.");
 						return;
 					}
-				} else { bot.sendMessage(msg.channel, "No lottery in progress at the moment.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+				} else { bot.sendMessage(msg.channel, "<:Bot:230821190648856577> No lottery in progress at the moment.", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
 
 			} else if (msg.mentions.length > 0) {
 
-				if (msg.channel.isPrivate) { bot.sendMessage(msg, "Not possible in Direct Messages."); return; }
-				if (msg.mentions.length < 2) { bot.sendMessage(msg, "You need to enter multiple users!"); return; }
+				if (msg.channel.isPrivate) { bot.sendMessage(msg, "<:Bot:230821190648856577> Not possible in Direct Messages."); return; }
+				if (msg.mentions.length < 2) { bot.sendMessage(msg, "<:Bot:230821190648856577> You need to enter multiple users!"); return; }
 				var choice = Math.floor(Math.random() * msg.mentions.length);
-				bot.sendMessage(msg, "From **" + msg.mentions.length + "** entries the winner of this lottery is " + msg.mentions[choice]);
+				bot.sendMessage(msg, "<:Bot:230821190648856577> From **" + msg.mentions.length + "** entries the winner of this lottery is " + msg.mentions[choice]);
 
 			} else { bot.sendMessage(msg, correctUsage("lotto"), function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 15000}); }); } //wrong usage
 		}
@@ -504,10 +1083,10 @@ var commands = {
 			var currentChannel = msg.channel.id;
 			if (suffix.split(" ")[0] == "new") {
 
-				if (msg.channel.isPrivate) { bot.sendMessage(msg, "Not possible in Direct Messages."); return; }
-				if (VoteDB.hasOwnProperty(currentChannel)) { bot.sendMessage(msg, "There is already a vote pending!", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+				if (msg.channel.isPrivate) { bot.sendMessage(msg, "<:Bot:230821190648856577> Not possible in Direct Messages."); return; }
+				if (VoteDB.hasOwnProperty(currentChannel)) { bot.sendMessage(msg, "<:Bot:230821190648856577> There is already a vote pending!", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
 				var topic = (suffix.replace(" -noautoend", "").split(" ").length > 1) ? suffix.replace(" -noautoend", "").substring(4) : "None";
-				bot.sendMessage(msg, "New vote started by **" + msg.author.username + "**. Topic: `" + topic + "`. To vote say `" + config.command_prefix + "vote +/-`\nUpvotes: 0\nDownvotes: 0", function(err, message) {
+				bot.sendMessage(msg, "<:Bot:230821190648856577> New vote started by **" + msg.author.username + "**. Topic: `" + topic + "`. To vote say `" + config.command_prefix + "vote +/-`\nUpvotes: 0\nDownvotes: 0", function(err, message) {
 					if (err) { bot.sendMessage(msg, err); return; }
 					var object = {"topic": topic, "annMsg": message, "upvoters": "", "downvoters": "", "upvotes": 0, "downvotes": 0, "starter": msg.author.id};
 					VoteDB[currentChannel] = [];
@@ -517,18 +1096,18 @@ var commands = {
 
 			} else if (suffix.replace(" ", "") == "end") {
 
-				if (msg.channel.isPrivate) { bot.sendMessage(msg, "Not possible in Direct Messages."); return; }
-				if (!VoteDB.hasOwnProperty(currentChannel)) { bot.sendMessage(msg, "No vote running to end!", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+				if (msg.channel.isPrivate) { bot.sendMessage(msg, "<:Bot:230821190648856577> Not possible in Direct Messages."); return; }
+				if (!VoteDB.hasOwnProperty(currentChannel)) { bot.sendMessage(msg, "<:Bot:230821190648856577> No vote running to end!", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
 				if (msg.author.id == VoteDB[currentChannel][0].starter || msg.channel.permissionsOf(msg.author).hasPermission("manageChannel")) {
 					bot.deleteMessage(VoteDB[currentChannel][0].annMsg);
-					bot.sendMessage(msg, "**The results of last vote:**\nTopic: `" + VoteDB[currentChannel][0].topic + "`\nUpvotes: `" + VoteDB[currentChannel][0].upvotes + " " + Math.round((VoteDB[currentChannel][0].upvotes / (VoteDB[currentChannel][0].upvotes + VoteDB[currentChannel][0].downvotes)) * 100) + "%`\nDownvotes: `" + VoteDB[currentChannel][0].downvotes + " " + Math.round((VoteDB[currentChannel][0].downvotes / (VoteDB[currentChannel][0].upvotes + VoteDB[currentChannel][0].downvotes)) * 100) + "%`");
+					bot.sendMessage(msg, "<:Bot:230821190648856577> **The results of last vote:**\nTopic: `" + VoteDB[currentChannel][0].topic + "`\nUpvotes: `" + VoteDB[currentChannel][0].upvotes + " " + Math.round((VoteDB[currentChannel][0].upvotes / (VoteDB[currentChannel][0].upvotes + VoteDB[currentChannel][0].downvotes)) * 100) + "%`\nDownvotes: `" + VoteDB[currentChannel][0].downvotes + " " + Math.round((VoteDB[currentChannel][0].downvotes / (VoteDB[currentChannel][0].upvotes + VoteDB[currentChannel][0].downvotes)) * 100) + "%`");
 					delete VoteDB[currentChannel];
-				} else { bot.sendMessage(msg, "Only the one who started the vote can end the vote!", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+				} else { bot.sendMessage(msg, "<:Bot:230821190648856577> Only the one who started the vote can end the vote!", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
 
 			} else if (suffix.replace(" ", "") == "+" || suffix.replace(" ", "") == "-") {
 
-				if (msg.channel.isPrivate) { bot.sendMessage(msg, "Not possible in Direct Messages."); return; }
-				if (VoteDB.hasOwnProperty(currentChannel) == false) { bot.sendMessage(msg, "No running vote to vote on!", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
+				if (msg.channel.isPrivate) { bot.sendMessage(msg, "<:Bot:230821190648856577> Not possible in Direct Messages."); return; }
+				if (VoteDB.hasOwnProperty(currentChannel) == false) { bot.sendMessage(msg, "<:Bot:230821190648856577> No running vote to vote on!", function(erro, wMessage) { bot.deleteMessage(wMessage, {"wait": 8000}); }); return; }
 				if (suffix.replace(" ", "") == "+") {
 					if (VoteDB[currentChannel][0].upvoters.indexOf(msg.author.id) > -1) { return; }
 					if (VoteDB[currentChannel][0].downvoters.indexOf(msg.author.id) > -1) {
@@ -681,8 +1260,8 @@ var commands = {
 		cooldown: 2,
 		process: function(bot, msg, suffix) {
 			var side = Math.floor(Math.random() * (2));
-			if (side == 0) { bot.sendMessage(msg, "**" + msg.author.username + "** has flipped a coin. It's ***Heads***!");
-			} else { bot.sendMessage(msg, "**" + msg.author.username + "** has flipped a coin. It's **Tails**!"); }
+			if (side == 0) { bot.sendMessage(msg, "<:Bot:230821190648856577> **" + msg.author.username + "** has flipped a coin. It's ***Heads***!");
+			} else { bot.sendMessage(msg, "<:Bot:230821190648856577> **" + msg.author.username + "** has flipped a coin. It's **Tails**!"); }
 		}
 	},
 	"osu": {
