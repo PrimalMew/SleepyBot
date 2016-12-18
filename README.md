@@ -1,4 +1,4 @@
-# SleepyBot v1.1.1 [NOT UP TO DATE]
+# SleepyBot v1.1.4
 ##### Discord bot made for _SleepyJirachi_ in service to _SleepyTown_. Join the Town here: https://discord.gg/0X7Rd55XaUoVIIay
 
 ###### For SleepyBot's Official Server, please use this invite: https://discord.gg/0uMmASW7OYifdsIt
