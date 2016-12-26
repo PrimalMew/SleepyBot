@@ -1,7 +1,7 @@
 {
-	"bot_token": "MTYyMDYxMjI0NjM1NDAwMTky.Cfc5rA.3wdUdSy4T7IqRovugBqJw5xfSBs",
-	"email": "sleepsbot@gmail.com",
-	"password": "bestBOT2016",
+	"bot_token": "",
+	"email": "",
+	"password": "",
 	"command_prefix": "*",
 	"mod_command_prefix": "-",
 	"music_command_prefix": "%",
@@ -14,12 +14,12 @@
 	"username_changes": false,
 	"ban_alerts": true,
 	"send_mentions": true,
-	"mal_user": "PrimalMew",
-	"mal_pass": "Thunder123thornthun",
+	"mal_user": "",
+	"mal_pass": "",
 	"use_env": true,
-	"weather_api_key": "9ef988c4026445e0f45944025748509e",
-	"osu_api_key": "ea737abc6cded3a6f7698ffe9d8745b4cacd9bfc",
-	"imgur_client_id": "af8e6a767699309",
+	"weather_api_key": "",
+	"osu_api_key": "",
+	"imgur_client_id": "",
 	"banned_server_ids": [""],
-	"youtube_api_key": "AIzaSyCO2P8yWzTGYzUx5xXv4WTGLRKIfi4CprI"
+	"youtube_api_key": ""
 }
