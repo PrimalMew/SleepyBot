@@ -3,6 +3,8 @@
 
 ###### For SleepyBot's Official Server, please use this invite: https://discord.gg/0uMmASW7OYifdsIt
 
+### THIS BOT WILL NOT WORK OUTSIDE OF SLEEPYTOWN
+
 # |    _CHANGELOG_    |
 
 #### **Version 1.1.4**:
